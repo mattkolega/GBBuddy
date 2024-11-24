@@ -57,7 +57,7 @@ pub fn CP(cpu: *CPU, value: u8) void {
 }
 
 /// Decrements value
-pub fn DEC(cpu: *CPU, value: *u8) void {
+pub fn DEC8(cpu: *CPU, value: *u8) void {
     const originalValue = value;
     value -%= 1;
 
@@ -67,9 +67,9 @@ pub fn DEC(cpu: *CPU, value: *u8) void {
 }
 
 /// Increments value
-pub fn INC(cpu: *CPU, value: *u8) void {
+pub fn INC8(cpu: *CPU, value: *u8) void {
     const originalValue = value;
-    value -%= 1;
+    value +%= 1;
 
     if (value == 0) cpu.zero = 1 else cpu.zero = 0;
     cpu.subtract = 0;
@@ -101,7 +101,7 @@ pub fn SBC(cpu: *CPU, value: u8) void {
 }
 
 /// Subtracts value from accumulator
-pub fn SUB8(cpu: *CPU, value: u8) void {
+pub fn SUB(cpu: *CPU, value: u8) void {
     const originalValue = cpu.A;
     const subResult = @subWithOverflow(cpu.A, value);
     cpu.A = subResult[0];
@@ -122,6 +122,29 @@ pub fn XOR(cpu: *CPU, value: u8) void {
     cpu.subtract = 0;
     cpu.halfCarry = 0;
     cpu.carry = 0;
+}
+
+// ---
+// 16-bit Arithmetic Instructions
+// ---
+
+pub fn ADD16(cpu: *CPU, value: u16) void {
+    const originalValue = cpu.A;
+    const addResult = @addWithOverflow(cpu.A, value);
+    cpu.A = addResult[0];
+
+    // Set flags
+    cpu.subtract = 0;
+    cpu.halfCarry = @intFromBool(bitutils.checkHalfCarry16(originalValue, value, '+'));
+    cpu.carry = addResult[1];
+}
+
+pub fn DEC16(value: *u16) void {
+    value -%= 1;
+}
+
+pub fn INC16(value: *u16) void {
+    value +%= 1;
 }
 
 // ---
