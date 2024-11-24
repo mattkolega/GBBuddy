@@ -128,6 +128,7 @@ pub fn XOR(cpu: *CPU, value: u8) void {
 // 16-bit Arithmetic Instructions
 // ---
 
+/// Adds value to accumulator
 pub fn ADD16(cpu: *CPU, value: u16) void {
     const originalValue = cpu.A;
     const addResult = @addWithOverflow(cpu.A, value);
@@ -139,13 +140,48 @@ pub fn ADD16(cpu: *CPU, value: u16) void {
     cpu.carry = addResult[1];
 }
 
+/// Decrements value
 pub fn DEC16(value: *u16) void {
     value -%= 1;
 }
 
+/// Increments value
 pub fn INC16(value: *u16) void {
     value +%= 1;
 }
+
+// ---
+// Bit Operation Instructions
+// ---
+
+/// Checks if bit is set
+pub fn BIT(cpu: *CPU, bitPos: u3, value: u8) void {
+    if ((value & bitPos) == bitPos) cpu.zero = 1 else cpu.zero = 2;
+    cpu.subtract = 0;
+    cpu.halfCarry = 1;
+}
+
+/// Resets bit to 0
+pub fn RES(bitPos: u3, value: *u8) void {
+    value &= ~bitPos;
+}
+
+/// Sets bit to 1
+pub fn SET(bitPos: u3, value: *u8) void {
+    value |= bitPos;
+}
+
+/// Swaps upper 4 bits and lower 4 bits of value
+pub fn SWAP(cpu: *CPU, value: *u8) void {
+    value = @truncate(@as(u16, (value << 4)) | @as(u16, (value >> 4)));
+
+    // Set flags
+    if (value == 0) cpu.zero = 1 else cpu.zero = 0;
+    cpu.subtract = 0;
+    cpu.halfCarry = 0;
+    cpu.carry = 0;
+}
+
 
 // ---
 // Miscellaneous Instructions
