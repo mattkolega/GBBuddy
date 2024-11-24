@@ -123,3 +123,74 @@ pub fn XOR(cpu: *CPU, value: u8) void {
     cpu.halfCarry = 0;
     cpu.carry = 0;
 }
+
+// ---
+// Miscellaneous Instructions
+// ---
+
+/// Complements carry flag
+pub fn CCF(cpu: *CPU) void {
+    cpu.subtract = 0;
+    cpu.halfCarry = 0;
+    cpu.carry = ~cpu.carry;
+}
+
+/// Complements accumulator
+pub fn CPL(cpu: *CPU) void {
+    cpu.A = ~cpu.A;
+
+    // Set flags
+    cpu.subtract = 0;
+    cpu.halfCarry = 0;
+}
+
+/// Gets BCD representation of accumulator
+pub fn DAA(cpu: *CPU) void {
+    var offset: u8 = 0;
+
+    if (cpu.subtract == 0 and (cpu.a & 0xF) > 0x9 or cpu.halfCarry == 1) {
+        offset |= 0x06;
+    }
+
+    if (cpu.subtract == 0 and cpu.a > 0x99 or cpu.carry == 1) {
+        offset |= 0x60;
+        cpu.carry = 1;
+    }
+
+    if (cpu.subtract == 0) cpu.a +% offset else cpu.a -% offset;
+
+    // Set flags
+    if (cpu.A == 0) cpu.zero = 1 else cpu.zero = 0;
+    cpu.halfCarry = 0;
+}
+
+/// Disables interrupts
+pub fn DI(cpu: *CPU) void {
+    cpu.ime = 0;
+}
+
+/// Enables interrupts
+pub fn EI() void {
+    // TODO: Add delayed setting of IME flag
+}
+
+/// Enters CPU low-power mode
+pub fn HALT() void {
+    // TODO: Implement behaviour
+}
+
+/// Performs no operation
+pub fn NOP() void {
+    return;
+}
+
+/// Sets carry flag
+pub fn SCF(cpu: *CPU) void {
+    cpu.subtract = 0;
+    cpu.halfCarry = 0;
+    cpu.carry = 1;
+}
+
+pub fn STOP() void {
+    // TODO: Implement behaviour
+}
