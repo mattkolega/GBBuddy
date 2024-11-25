@@ -60,20 +60,20 @@ pub fn CP(cpu: *CPU, value: u8) void {
 
 /// Decrements value
 pub fn DEC8(cpu: *CPU, value: *u8) void {
-    const originalValue = value;
-    value -%= 1;
+    const originalValue = value.*;
+    value.* -%= 1;
 
-    if (value == 0) cpu.zero = 1 else cpu.zero = 0;
+    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
     cpu.subtract = 1;
     cpu.halfCarry = @intFromBool(bitutils.checkHalfCarry8(originalValue, 1, '-'));
 }
 
 /// Increments value
 pub fn INC8(cpu: *CPU, value: *u8) void {
-    const originalValue = value;
-    value +%= 1;
+    const originalValue = value.*;
+    value.* +%= 1;
 
-    if (value == 0) cpu.zero = 1 else cpu.zero = 0;
+    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
     cpu.subtract = 0;
     cpu.halfCarry = @intFromBool(bitutils.checkHalfCarry8(originalValue, 1, '+'));
 }
@@ -144,12 +144,12 @@ pub fn ADD16(cpu: *CPU, value: u16) void {
 
 /// Decrements value
 pub fn DEC16(value: *u16) void {
-    value -%= 1;
+    value.* -%= 1;
 }
 
 /// Increments value
 pub fn INC16(value: *u16) void {
-    value +%= 1;
+    value.* +%= 1;
 }
 
 // ---
@@ -165,20 +165,20 @@ pub fn BIT(cpu: *CPU, bitPos: u3, value: u8) void {
 
 /// Resets bit to 0
 pub fn RES(bitPos: u3, value: *u8) void {
-    value &= ~bitPos;
+    value.* &= ~bitPos;
 }
 
 /// Sets bit to 1
 pub fn SET(bitPos: u3, value: *u8) void {
-    value |= bitPos;
+    value.* |= bitPos;
 }
 
 /// Swaps upper 4 bits and lower 4 bits of value
 pub fn SWAP(cpu: *CPU, value: *u8) void {
-    value = @truncate(@as(u16, (value << 4)) | @as(u16, (value >> 4)));
+    value.* = @truncate(@as(u16, (value.* << 4)) | @as(u16, (value.* >> 4)));
 
     // Set flags
-    if (value == 0) cpu.zero = 1 else cpu.zero = 0;
+    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
     cpu.subtract = 0;
     cpu.halfCarry = 0;
     cpu.carry = 0;
