@@ -1,5 +1,7 @@
 //! Implementation of Game Boy CPU (Sharp SM83) instructions
 
+const math = @import("std").math;
+
 const bitutils = @import("bitutils.zig");
 const CPU = @import("cpu.zig").CPU;
 
@@ -180,6 +182,140 @@ pub fn SWAP(cpu: *CPU, value: *u8) void {
     cpu.subtract = 0;
     cpu.halfCarry = 0;
     cpu.carry = 0;
+}
+
+// ---
+// Bit Shift Instructions
+// ---
+
+/// Rotates carry flag + value left
+pub fn RL(cpu: *CPU, value: *u8) void {
+    const carryValue = cpu.carry;  // Get current carry flag value
+    cpu.carry = bitutils.getBitFromByte(value.*, 7);  // Set carry flag to leftmost bit
+    value.* = math.rotl(u8, value.*, @as(usize, 1));
+    value.* &= carryValue;
+
+    // Set flags
+    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
+    cpu.subtract = 0;
+    cpu.halfCarry = 0;
+}
+
+/// Rotates carry flag + accumulator left
+pub fn RLA(cpu: *CPU) void {
+    const carryValue = cpu.carry;  // Get current carry flag value
+    cpu.carry = bitutils.getBitFromByte(cpu.A, 7);  // Set carry flag to leftmost bit
+    cpu.A = math.rotl(u8, cpu.A, @as(usize, 1));
+    cpu.A &= carryValue;
+
+    // Set flags
+    cpu.zero = 0;
+    cpu.subtract = 0;
+    cpu.halfCarry = 0;
+}
+
+/// Rotates register left. Bit 7 is stored in carry flag
+pub fn RLC(cpu: *CPU, value: *u8) void {
+    cpu.carry = bitutils.getBitFromByte(value.*, 7);  // Set carry flag to leftmost bit
+    value.* = math.rotl(u8, value.*, @as(usize, 1));
+
+    // Set flags
+    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
+    cpu.subtract = 0;
+    cpu.halfCarry = 0;
+}
+
+/// Rotates accumulator left. Bit 7 is stored in carry flag
+pub fn RLCA(cpu: *CPU) void {
+    cpu.carry = bitutils.getBitFromByte(cpu.A, 7);  // Set carry flag to leftmost bit
+    cpu.A = math.rotl(u8, cpu.A, @as(usize, 1));
+
+    // Set flags
+    cpu.zero = 0;
+    cpu.subtract = 0;
+    cpu.halfCarry = 0;
+}
+
+/// Rotates value + carry flag right
+pub fn RR(cpu: *CPU, value: *u8) void {
+    const carryValue = cpu.carry;  // Get current carry flag value
+    cpu.carry = bitutils.getBitFromByte(value.*, 0);  // Set carry flag to right-most bit
+    value.* = math.rotr(u8, value.*, @as(usize, 1));
+    value.* &= (carryValue << 7);
+
+    // Set flags
+    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
+    cpu.subtract = 0;
+    cpu.halfCarry = 0;
+}
+
+/// Rotates accumulator + carry flag right
+pub fn RRA(cpu: *CPU) void {
+    const carryValue = cpu.carry;  // Get current carry flag value
+    cpu.carry = bitutils.getBitFromByte(cpu.A, 0);  // Set carry flag to right-most bit
+    cpu.A = math.rotr(u8, cpu.A, @as(usize, 1));
+    cpu.A &= (carryValue << 7);
+
+    // Set flags
+    cpu.zero = 0;
+    cpu.subtract = 0;
+    cpu.halfCarry = 0;
+}
+
+/// Rotates value right. Bit 0 is stored in carry flag.
+pub fn RRC(cpu: *CPU, value: *u8) void {
+    cpu.carry = bitutils.getBitFromByte(value.*, 0);  // Set carry flag to right-most bit
+    value.* = math.rotr(u8, value.*, @as(usize, 1));
+
+    // Set flags
+    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
+    cpu.subtract = 0;
+    cpu.halfCarry = 0;
+}
+
+/// Rotates accumulator right. Bit 0 is stored in carry flag.
+pub fn RRCA(cpu: *CPU) void {
+    cpu.carry = bitutils.getBitFromByte(cpu.A, 0);  // Set carry flag to right-most bit
+    cpu.A = math.rotr(u8, cpu.A, @as(usize, 1));
+
+    // Set flags
+    cpu.zero = 0;
+    cpu.subtract = 0;
+    cpu.halfCarry = 0;
+}
+
+/// Shifts left arithmetically. Bit 0 is zeroed
+pub fn SLA(cpu: *CPU, value: *u8) void {
+    cpu.carry = bitutils.getBitFromByte(value.*, 7);  // Set carry flag to leftmost bit
+    value.* = math.shl(u8, value.*, @as(usize, 1));
+
+    // Set flags
+    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
+    cpu.subtract = 0;
+    cpu.halfCarry = 0;
+}
+
+/// Shifts right arithmetically. Bit 7 remains the same
+pub fn SRA(cpu: *CPU, value: *u8) void {
+    cpu.carry = bitutils.getBitFromByte(value.*, 7);  // Set carry flag to leftmost bit
+    value.* = math.shr(u8, value.*, @as(usize, 1));
+    value.* |= (cpu.carry << 7);
+
+    // Set flags
+    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
+    cpu.subtract = 0;
+    cpu.halfCarry = 0;
+}
+
+/// Shifts right logically. Bit 7 is zeroed
+pub fn SRL(cpu: *CPU, value: *u8) void {
+    cpu.carry = bitutils.getBitFromByte(value.*, 7);  // Set carry flag to leftmost bit
+    value.* = math.shr(u8, value.*, @as(usize, 1));
+
+    // Set flags
+    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
+    cpu.subtract = 0;
+    cpu.halfCarry = 0;
 }
 
 
