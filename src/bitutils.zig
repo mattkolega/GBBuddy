@@ -24,6 +24,11 @@ pub fn checkHalfCarry16(operand1: u16, operand2: u16, comptime operation: u8) bo
     }
 }
 
+/// Gets nth bit from an 8-bit value
+pub fn getBitFromByte(value: u8, comptime n: u3) u1 {
+    return @truncate(value >> n);
+}
+
 // ---
 // Tests
 // ---
@@ -42,4 +47,15 @@ test "checkHalfCarry16" {
     try expectEqual(false, checkHalfCarry16(0x100, 0x100, '+'));
     try expectEqual(true, checkHalfCarry16(0x100, 0xF00, '-'));
     try expectEqual(false, checkHalfCarry16(0xF00, 0x100, '-'));
+}
+
+test "getBitFromByte" {
+    try expectEqual(0b1, getBitFromByte(0b1011_1001, 7));
+    try expectEqual(0b0, getBitFromByte(0b1011_1001, 6));
+    try expectEqual(0b1, getBitFromByte(0b1011_1001, 5));
+    try expectEqual(0b1, getBitFromByte(0b1011_1001, 4));
+    try expectEqual(0b1, getBitFromByte(0b1011_1001, 3));
+    try expectEqual(0b0, getBitFromByte(0b1011_1001, 2));
+    try expectEqual(0b0, getBitFromByte(0b1011_1001, 1));
+    try expectEqual(0b1, getBitFromByte(0b1011_1001, 0));
 }
