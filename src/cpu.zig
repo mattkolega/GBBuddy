@@ -57,7 +57,7 @@ pub const CPU = packed struct {
     fn getSubtract(self: *CPU) u1 {
         return bitutils.getBitFromByte(self.f, 6);
     }
-    fn setSubstract(self: *CPU, value: u1) void {
+    fn setSubtract(self: *CPU, value: u1) void {
         self.f = bitutils.setBitInByte(self.f, 6, value);
     }
     fn getHalfCarry(self: *CPU) u1 {
