@@ -325,38 +325,38 @@ pub fn SRL(cpu: *CPU, value: *u8) void {
 
 /// Complements carry flag
 pub fn CCF(cpu: *CPU) void {
-    cpu.subtract = 0;
-    cpu.halfCarry = 0;
-    cpu.carry = ~cpu.carry;
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
+    cpu.setCarry(~cpu.getCarry());
 }
 
 /// Complements accumulator
 pub fn CPL(cpu: *CPU) void {
-    cpu.A = ~cpu.A;
+    cpu.a = ~cpu.a;
 
     // Set flags
-    cpu.subtract = 0;
-    cpu.halfCarry = 0;
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
 }
 
 /// Gets BCD representation of accumulator
 pub fn DAA(cpu: *CPU) void {
     var offset: u8 = 0;
 
-    if (cpu.subtract == 0 and (cpu.a & 0xF) > 0x9 or cpu.halfCarry == 1) {
+    if (cpu.getSubtract() == 0 and (cpu.a & 0xF) > 0x9 or cpu.getHalfCarry() == 1) {
         offset |= 0x06;
     }
 
-    if (cpu.subtract == 0 and cpu.a > 0x99 or cpu.carry == 1) {
+    if (cpu.getSubtract() == 0 and cpu.a > 0x99 or cpu.getCarry() == 1) {
         offset |= 0x60;
-        cpu.carry = 1;
+        cpu.setCarry(1);
     }
 
-    if (cpu.subtract == 0) cpu.a +% offset else cpu.a -% offset;
+    if (cpu.getSubtract() == 0) cpu.a +% offset else cpu.a -% offset;
 
     // Set flags
-    if (cpu.A == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.halfCarry = 0;
+    if (cpu.a == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setHalfCarry(0);
 }
 
 /// Disables interrupts
@@ -381,9 +381,9 @@ pub fn NOP() void {
 
 /// Sets carry flag
 pub fn SCF(cpu: *CPU) void {
-    cpu.subtract = 0;
-    cpu.halfCarry = 0;
-    cpu.carry = 1;
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
+    cpu.setCarry(1);
 }
 
 pub fn STOP() void {
