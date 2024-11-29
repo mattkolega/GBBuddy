@@ -11,51 +11,51 @@ const CPU = @import("cpu.zig").CPU;
 
 /// Adds value and carry bit to accumulator
 pub fn ADC(cpu: *CPU, value: u8) void {
-    const originalValue = cpu.A;
-    const addResult = @addWithOverflow(cpu.A, (value + cpu.carry));
-    cpu.A = addResult[0];
+    const originalValue = cpu.a;
+    const addResult = @addWithOverflow(cpu.a, (value + cpu.getCarry()));
+    cpu.a = addResult[0];
 
     // Set flags
-    if (cpu.A == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = @intFromBool(bitutils.checkHalfCarry8(originalValue, (value + cpu.carry), '+'));
-    cpu.carry = addResult[1];
+    if (cpu.a == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry8(originalValue, (value + cpu.getCarry()), '+')));
+    cpu.setCarry(addResult[1]);
 }
 
 /// Adds value to accumulator
 pub fn ADD8(cpu: *CPU, value: u8) void {
-    const originalValue = cpu.A;
-    const addResult = @addWithOverflow(cpu.A, value);
-    cpu.A = addResult[0];
+    const originalValue = cpu.a;
+    const addResult = @addWithOverflow(cpu.a, value);
+    cpu.a = addResult[0];
 
     // Set flags
-    if (cpu.A == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = @intFromBool(bitutils.checkHalfCarry8(originalValue, value, '+'));
-    cpu.carry = addResult[1];
+    if (cpu.a == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry8(originalValue, value, '+')));
+    cpu.setCarry(addResult[1]);
 }
 
 /// Bitwise AND of accumulator and value
 pub fn AND(cpu: *CPU, value: u8) void {
-    cpu.A &= value;
+    cpu.a &= value;
 
     // Set flags
-    if (cpu.A == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = 1;
-    cpu.carry = 0;
+    if (cpu.a == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(1);
+    cpu.setCarry(0);
 }
 
 /// Compares accumulator and value
 pub fn CP(cpu: *CPU, value: u8) void {
-    const originalValue = cpu.A;
-    const subResult = @subWithOverflow(cpu.A, value);
+    const originalValue = cpu.a;
+    const subResult = @subWithOverflow(cpu.a, value);
 
     // Set flags
-    if (subResult[0] == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 1;
-    cpu.halfCarry = @intFromBool(bitutils.checkHalfCarry8(originalValue, value, '-'));
-    cpu.carry = subResult[1];
+    if (subResult[0] == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(1);
+    cpu.setHalfCarry(bitutils.checkHalfCarry8(originalValue, value, '-'));
+    cpu.setCarry(subResult[1]);
 }
 
 /// Decrements value
@@ -63,9 +63,10 @@ pub fn DEC8(cpu: *CPU, value: *u8) void {
     const originalValue = value.*;
     value.* -%= 1;
 
-    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 1;
-    cpu.halfCarry = @intFromBool(bitutils.checkHalfCarry8(originalValue, 1, '-'));
+    // Set flags
+    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(1);
+    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry8(originalValue, 1, '-')));
 }
 
 /// Increments value
@@ -73,57 +74,58 @@ pub fn INC8(cpu: *CPU, value: *u8) void {
     const originalValue = value.*;
     value.* +%= 1;
 
-    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = @intFromBool(bitutils.checkHalfCarry8(originalValue, 1, '+'));
+    // Set flags
+    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry8(originalValue, 1, '+')));
 }
 
 /// Bitwise OR of accumulator and value
 pub fn OR(cpu: *CPU, value: u8) void {
-    cpu.A |= value;
+    cpu.a |= value;
 
     // Set flags
-    if (cpu.A == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = 0;
-    cpu.carry = 0;
+    if (cpu.a == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
+    cpu.setCarry(0);
 }
 
 /// Subtracts value and carry bit from accumulator
 pub fn SBC(cpu: *CPU, value: u8) void {
-    const originalValue = cpu.A;
-    const subResult = @subWithOverflow(cpu.A, (value + cpu.carry));
-    cpu.A = subResult[0];
+    const originalValue = cpu.a;
+    const subResult = @subWithOverflow(cpu.a, (value + cpu.getCarry()));
+    cpu.a = subResult[0];
 
     // Set flags
-    if (cpu.A == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 1;
-    cpu.halfCarry = @intFromBool(bitutils.checkHalfCarry8(originalValue, (value + cpu.carry), '-'));
-    cpu.carry = subResult[1];
+    if (cpu.a == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(1);
+    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry8(originalValue, (value + cpu.getCarry()), '-')));
+    cpu.setCarry(subResult[1]);
 }
 
 /// Subtracts value from accumulator
 pub fn SUB(cpu: *CPU, value: u8) void {
-    const originalValue = cpu.A;
-    const subResult = @subWithOverflow(cpu.A, value);
-    cpu.A = subResult[0];
+    const originalValue = cpu.a;
+    const subResult = @subWithOverflow(cpu.a, value);
+    cpu.a = subResult[0];
 
     // Set flags
-    if (cpu.A == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 1;
-    cpu.halfCarry = @intFromBool(bitutils.checkHalfCarry8(originalValue, value, '-'));
-    cpu.carry = subResult[1];
+    if (cpu.a == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(1);
+    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry8(originalValue, value, '-')));
+    cpu.setCarry(subResult[1]);
 }
 
 /// Bitwise XOR of accumulator and value
 pub fn XOR(cpu: *CPU, value: u8) void {
-    cpu.A ^= value;
+    cpu.a ^= value;
 
     // Set flags
-    if (cpu.A == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = 0;
-    cpu.carry = 0;
+    if (cpu.a == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
+    cpu.setCarry(0);
 }
 
 // ---
@@ -132,14 +134,14 @@ pub fn XOR(cpu: *CPU, value: u8) void {
 
 /// Adds value to accumulator
 pub fn ADD16(cpu: *CPU, value: u16) void {
-    const originalValue = cpu.A;
-    const addResult = @addWithOverflow(cpu.A, value);
-    cpu.A = addResult[0];
+    const originalValue = cpu.a;
+    const addResult = @addWithOverflow(cpu.a, value);
+    cpu.a = addResult[0];
 
     // Set flags
-    cpu.subtract = 0;
-    cpu.halfCarry = @intFromBool(bitutils.checkHalfCarry16(originalValue, value, '+'));
-    cpu.carry = addResult[1];
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry16(originalValue, value, '+')));
+    cpu.setCarry(addResult[1]);
 }
 
 /// Decrements value
@@ -158,9 +160,9 @@ pub fn INC16(value: *u16) void {
 
 /// Checks if bit is set
 pub fn BIT(cpu: *CPU, bitPos: u3, value: u8) void {
-    if ((value & bitPos) == bitPos) cpu.zero = 1 else cpu.zero = 2;
-    cpu.subtract = 0;
-    cpu.halfCarry = 1;
+    if ((value & bitPos) == bitPos) cpu.setZero(1) else cpu.setZero(2);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(1);
 }
 
 /// Resets bit to 0
@@ -178,10 +180,10 @@ pub fn SWAP(cpu: *CPU, value: *u8) void {
     value.* = @truncate(@as(u16, (value.* << 4)) | @as(u16, (value.* >> 4)));
 
     // Set flags
-    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = 0;
-    cpu.carry = 0;
+    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
+    cpu.setCarry(0);
 }
 
 // ---
@@ -190,132 +192,132 @@ pub fn SWAP(cpu: *CPU, value: *u8) void {
 
 /// Rotates carry flag + value left
 pub fn RL(cpu: *CPU, value: *u8) void {
-    const carryValue = cpu.carry;  // Get current carry flag value
-    cpu.carry = bitutils.getBitFromByte(value.*, 7);  // Set carry flag to leftmost bit
+    const carryValue = cpu.getCarry();  // Get current carry flag value
+    cpu.setCarry(bitutils.getBitFromByte(value.*, 7));  // Set carry flag to leftmost bit
     value.* = math.rotl(u8, value.*, @as(usize, 1));
     value.* &= carryValue;
 
     // Set flags
-    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = 0;
+    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
 }
 
 /// Rotates carry flag + accumulator left
 pub fn RLA(cpu: *CPU) void {
-    const carryValue = cpu.carry;  // Get current carry flag value
-    cpu.carry = bitutils.getBitFromByte(cpu.A, 7);  // Set carry flag to leftmost bit
-    cpu.A = math.rotl(u8, cpu.A, @as(usize, 1));
-    cpu.A &= carryValue;
+    const carryValue = cpu.getCarry();  // Get current carry flag value
+    cpu.setCarry(bitutils.getBitFromByte(cpu.a, 7));  // Set carry flag to leftmost bit
+    cpu.a = math.rotl(u8, cpu.a, @as(usize, 1));
+    cpu.a &= carryValue;
 
     // Set flags
-    cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = 0;
+    cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
 }
 
 /// Rotates register left. Bit 7 is stored in carry flag
 pub fn RLC(cpu: *CPU, value: *u8) void {
-    cpu.carry = bitutils.getBitFromByte(value.*, 7);  // Set carry flag to leftmost bit
+    cpu.setCarry(bitutils.getBitFromByte(value.*, 7));  // Set carry flag to leftmost bit
     value.* = math.rotl(u8, value.*, @as(usize, 1));
 
     // Set flags
-    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = 0;
+    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
 }
 
 /// Rotates accumulator left. Bit 7 is stored in carry flag
 pub fn RLCA(cpu: *CPU) void {
-    cpu.carry = bitutils.getBitFromByte(cpu.A, 7);  // Set carry flag to leftmost bit
-    cpu.A = math.rotl(u8, cpu.A, @as(usize, 1));
+    cpu.setCarry(bitutils.getBitFromByte(cpu.a, 7));  // Set carry flag to leftmost bit
+    cpu.a = math.rotl(u8, cpu.a, @as(usize, 1));
 
     // Set flags
-    cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = 0;
+    cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
 }
 
 /// Rotates value + carry flag right
 pub fn RR(cpu: *CPU, value: *u8) void {
-    const carryValue = cpu.carry;  // Get current carry flag value
-    cpu.carry = bitutils.getBitFromByte(value.*, 0);  // Set carry flag to right-most bit
+    const carryValue = cpu.getCarry();  // Get current carry flag value
+    cpu.setCarry(bitutils.getBitFromByte(value.*, 0));  // Set carry flag to right-most bit
     value.* = math.rotr(u8, value.*, @as(usize, 1));
     value.* &= (carryValue << 7);
 
     // Set flags
-    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = 0;
+    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
 }
 
 /// Rotates accumulator + carry flag right
 pub fn RRA(cpu: *CPU) void {
-    const carryValue = cpu.carry;  // Get current carry flag value
-    cpu.carry = bitutils.getBitFromByte(cpu.A, 0);  // Set carry flag to right-most bit
-    cpu.A = math.rotr(u8, cpu.A, @as(usize, 1));
-    cpu.A &= (carryValue << 7);
+    const carryValue = cpu.getCarry();  // Get current carry flag value
+    cpu.setCarry(bitutils.getBitFromByte(cpu.a, 0));  // Set carry flag to right-most bit
+    cpu.a = math.rotr(u8, cpu.a, @as(usize, 1));
+    cpu.a &= (carryValue << 7);
 
     // Set flags
-    cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = 0;
+    cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
 }
 
 /// Rotates value right. Bit 0 is stored in carry flag.
 pub fn RRC(cpu: *CPU, value: *u8) void {
-    cpu.carry = bitutils.getBitFromByte(value.*, 0);  // Set carry flag to right-most bit
+    cpu.setCarry(bitutils.getBitFromByte(value.*, 0));  // Set carry flag to right-most bit
     value.* = math.rotr(u8, value.*, @as(usize, 1));
 
     // Set flags
-    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = 0;
+    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
 }
 
 /// Rotates accumulator right. Bit 0 is stored in carry flag.
 pub fn RRCA(cpu: *CPU) void {
-    cpu.carry = bitutils.getBitFromByte(cpu.A, 0);  // Set carry flag to right-most bit
-    cpu.A = math.rotr(u8, cpu.A, @as(usize, 1));
+    cpu.setCarry(bitutils.getBitFromByte(cpu.a, 0));  // Set carry flag to right-most bit
+    cpu.a = math.rotr(u8, cpu.a, @as(usize, 1));
 
     // Set flags
-    cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = 0;
+    cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
 }
 
 /// Shifts left arithmetically. Bit 0 is zeroed
 pub fn SLA(cpu: *CPU, value: *u8) void {
-    cpu.carry = bitutils.getBitFromByte(value.*, 7);  // Set carry flag to leftmost bit
+    cpu.setCarry(bitutils.getBitFromByte(value.*, 7));  // Set carry flag to leftmost bit
     value.* = math.shl(u8, value.*, @as(usize, 1));
 
     // Set flags
-    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = 0;
+    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
 }
 
 /// Shifts right arithmetically. Bit 7 remains the same
 pub fn SRA(cpu: *CPU, value: *u8) void {
-    cpu.carry = bitutils.getBitFromByte(value.*, 7);  // Set carry flag to leftmost bit
+    cpu.setCarry(bitutils.getBitFromByte(value.*, 7));  // Set carry flag to leftmost bit
     value.* = math.shr(u8, value.*, @as(usize, 1));
-    value.* |= (cpu.carry << 7);
+    value.* |= (cpu.getCarry() << 7);
 
     // Set flags
-    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = 0;
+    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
 }
 
 /// Shifts right logically. Bit 7 is zeroed
 pub fn SRL(cpu: *CPU, value: *u8) void {
-    cpu.carry = bitutils.getBitFromByte(value.*, 7);  // Set carry flag to leftmost bit
+    cpu.setCarry(bitutils.getBitFromByte(value.*, 7));  // Set carry flag to leftmost bit
     value.* = math.shr(u8, value.*, @as(usize, 1));
 
     // Set flags
-    if (value.* == 0) cpu.zero = 1 else cpu.zero = 0;
-    cpu.subtract = 0;
-    cpu.halfCarry = 0;
+    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
 }
 
 
