@@ -1,6 +1,7 @@
 //! Implementation of Game Boy CPU (Sharp SM83)
 
 const bitutils = @import("bitutils.zig");
+const GameBoy = @import("GameBoy.zig").GameBoy;
 
 pub const CPU = packed struct {
     // Registers
@@ -16,6 +17,12 @@ pub const CPU = packed struct {
     PC: u16,  // Program counter
 
     ime: u1,  // Interrupt master enable flag
+
+    gb: *GameBoy,
+
+    fn init(self: *CPU, gb: *GameBoy) void {
+        self.gb = gb;
+    }
 
     // 16-bit register helpers
     fn getAF(self: *CPU) u16 {
