@@ -1,10 +1,13 @@
 //! Implementation of Game Boy CPU (Sharp SM83) instructions
 
 const math = @import("std").math;
+const stringToEnum = @import("std").meta.stringToEnum;
 
 const bitutils = @import("bitutils.zig");
 const CPU = @import("cpu.zig").CPU;
 const log = @import("logger.zig");
+
+const Register = enum { AF, BC, DE, HL };
 
 // ---
 // 8-bit Arithmetic and Logic Instructions
@@ -419,6 +422,133 @@ pub fn LD_A_HLD(cpu: *CPU) void {
 
     cpu.memoryWrite(HL, cpu.a);
     cpu.setHL(HL-1);
+}
+
+// ---
+// Stack Operations
+// ---
+
+pub fn ADD_HL_SP(cpu: *CPU) void {
+    const originalValue = cpu.getHL();
+    const result = @addWithOverflow(originalValue, cpu.sp);
+    cpu.setHL(result[0]);
+
+    // Set flags
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry16(originalValue, cpu.sp, '+')));
+    cpu.setCarry(result[1]);
+}
+
+pub fn ADD_SP_e8(cpu: *CPU, value: i8) void {
+    const originalValue = cpu.sp;
+    const result = @addWithOverflow(cpu.sp, value);
+    cpu.sp = result[0];
+
+    // Set flags
+    cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry8(originalValue, value, '+')));
+    cpu.setCarry(result[1]);
+}
+
+pub fn DEC_SP(cpu: *CPU) void {
+    cpu.sp -%= 1;
+}
+
+pub fn INC_SP(cpu: *CPU) void {
+    cpu.sp +%= 1;
+}
+
+pub fn LD_SP_n16(cpu: *CPU, value: u16) void {
+    cpu.sp = value;
+}
+
+pub fn LD_n16_SP(cpu: *CPU, address: u16) void {
+    cpu.memoryWrite(address, cpu.sp & 0xFF);
+    cpu.memoryWrite(address + 1, (cpu.sp >> 8) & 0xFF);
+}
+
+pub fn LD_HL_SP(cpu: *CPU, value: i8) void {
+    const originalValue = cpu.sp;
+    const result = @addWithOverflow(originalValue, value);
+    cpu.setHL(result[0]);
+
+    cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry16(@truncate(cpu.sp), value, '+')));
+    cpu.setCarry(result[1]);
+}
+
+pub fn LD_SP_HL(cpu: *CPU) void {
+    cpu.sp = cpu.getHL();
+}
+
+/// Reads 16-bit register from stack
+pub fn POP(cpu: *CPU, comptime register: [2]u8) void {
+    const case = stringToEnum(Register, register);
+    switch (case) {
+        Register.AF => {
+            cpu.f = cpu.memoryRead(cpu.sp);
+            cpu.sp +%= 1;
+            cpu.a = cpu.memoryRead(cpu.sp);
+            cpu.sp +%= 1;
+        },
+        Register.BC => {
+            cpu.c = cpu.memoryRead(cpu.sp);
+            cpu.sp +%= 1;
+            cpu.b = cpu.memoryRead(cpu.sp);
+            cpu.sp +%= 1;
+        },
+        Register.DE => {
+            cpu.e = cpu.memoryRead(cpu.sp);
+            cpu.sp +%= 1;
+            cpu.d = cpu.memoryRead(cpu.sp);
+            cpu.sp +%= 1;
+        },
+        Register.HL => {
+            cpu.l = cpu.memoryRead(cpu.sp);
+            cpu.sp +%= 1;
+            cpu.h = cpu.memoryRead(cpu.sp);
+            cpu.sp +%= 1;
+        },
+        else => {
+            @panic("Invalid register given for POP operation. Must be AF, BC, DE or HL");
+        }
+    }
+}
+
+/// Writes 16-bit register to stack
+pub fn PUSH(cpu: *CPU, comptime register: [2]u8) void {
+    const case = stringToEnum(Register, register);
+    switch (case) {
+        Register.AF => {
+            cpu.sp -%= 1;
+            cpu.memoryWrite(cpu.sp, cpu.a);
+            cpu.sp -%= 1;
+            cpu.memoryWrite(cpu.sp, cpu.f);
+        },
+        Register.BC => {
+            cpu.sp -%= 1;
+            cpu.memoryWrite(cpu.sp, cpu.b);
+            cpu.sp -%= 1;
+            cpu.memoryWrite(cpu.sp, cpu.c);
+        },
+        Register.DE => {
+            cpu.sp -%= 1;
+            cpu.memoryWrite(cpu.sp, cpu.d);
+            cpu.sp -%= 1;
+            cpu.memoryWrite(cpu.sp, cpu.e);
+        },
+        Register.HL => {
+            cpu.sp -%= 1;
+            cpu.memoryWrite(cpu.sp, cpu.h);
+            cpu.sp -%= 1;
+            cpu.memoryWrite(cpu.sp, cpu.l);
+        },
+        else => {
+            @panic("Invalid register given for PUSH operation. Must be AF, BC, DE or HL");
+        }
+    }
 }
 
 // ---
