@@ -13,8 +13,8 @@ pub const CPU = packed struct {
     f: u8,
     h: u8,
     l: u8,
-    SP: u16,  // Stack pointer
-    PC: u16,  // Program counter
+    sp: u16,  // Stack pointer
+    pc: u16,  // Program counter
 
     ime: u1,  // Interrupt master enable flag
 
