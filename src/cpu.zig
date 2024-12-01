@@ -24,6 +24,14 @@ pub const CPU = packed struct {
         self.gb = gb;
     }
 
+    // Wrappers for MMU memory access
+    fn memoryRead(self: *CPU, address: u16) void {
+        self.gb.mmu.memoryRead(address);
+    }
+    fn memoryWrite(self: *CPU, address: u16, value: u8) void {
+        self.gb.mmu.memoryWrite(address, value);
+    }
+
     // 16-bit register helpers
     fn getAF(self: *CPU) u16 {
         return self.a << 8 | self.b;
