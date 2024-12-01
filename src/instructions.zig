@@ -4,6 +4,7 @@ const math = @import("std").math;
 
 const bitutils = @import("bitutils.zig");
 const CPU = @import("cpu.zig").CPU;
+const log = @import("logger.zig");
 
 // ---
 // 8-bit Arithmetic and Logic Instructions
@@ -320,6 +321,105 @@ pub fn SRL(cpu: *CPU, value: *u8) void {
     cpu.setHalfCarry(0);
 }
 
+// ---
+// Load Instructions
+// ---
+
+/// Loads 8-bit value into 8-bit register
+pub fn LD_r8(reg: *u8, value: u8) void {
+    reg.* = value;
+}
+
+/// Loads 16-bit value into 16-bit register
+pub fn LD_r16(reg: *u16, value: u16) void {
+    reg.* = value;
+}
+
+// Loads 8-bit value into byte pointed to by HL
+pub fn LD_HL(cpu: *CPU, value: u8) void {
+    cpu.memoryWrite(cpu.getHL(), value);
+}
+
+/// Gets value from accumulator and writes to memory with address from a register
+pub fn LD_r16_A(cpu: *CPU, address: u16) void {
+    cpu.memoryWrite(address, cpu.a);
+}
+
+// Gets value from accumulator and writes to memory
+pub fn LD_n16_A(cpu: *CPU, address: u16) void {
+    cpu.memoryWrite(address, cpu.a);
+}
+
+/// Gets value from memory with address from a register and writes to accumulator
+pub fn LD_A_r16(cpu: *CPU, address: u16) void {
+    cpu.a = cpu.memoryRead(address);
+}
+
+/// Gets value from memory and writes to accumulator
+pub fn LD_A_n16(cpu: *CPU, address: u16) void {
+    cpu.a = cpu.memoryRead(address);
+}
+
+/// Gets value from accumulator and writes to memory with address from a register.
+/// Address must be between $FF00 and $FFFF
+pub fn LDH_n16_A(cpu: *CPU, address: u16) void {
+    if (address >= 0xFF00 and address <= 0xFFFF) {
+        cpu.memoryWrite(address, cpu.a);
+    } else {
+        log.err("Error at LDH_n16_A - Address not within $FF00 and $FFFF");
+    }
+}
+
+/// Gets value from accumulator and writes to memory with address $FF00 + offset
+pub fn LDH_C_A(cpu: *CPU, offset: u8) void {
+    cpu.memoryWrite(0xFF00 + offset, cpu.a);
+}
+
+/// Gets value from memory at an address between $FF00 and $FFFF and writes to accumulator
+pub fn LDH_A_n16(cpu: *CPU, address: u16) void {
+    if (address >= 0xFF00 and address <= 0xFFFF) {
+        cpu.a = cpu.memoryRead(address);
+    } else {
+        log.err("Error at LDH_A_n16 - Address not within $FF00 and $FFFF");
+    }
+}
+
+/// Gets value from memory at address $FF00 + offset and writes to accumulator
+pub fn LDH_A_C(cpu: *CPU, offset: u8) void {
+    cpu.a = cpu.memoryRead(0xFF + offset);
+}
+
+/// Gets value from memory at address stored in HL and writes to accumulator. Increments HL afterwards
+pub fn LD_HLI_A(cpu: *CPU) void {
+    const HL = cpu.getHL();
+
+    cpu.a = cpu.memoryRead(HL);
+    cpu.setHL(HL+1);
+}
+
+/// Gets value from memory at address stored in HL and writes to accumulator. Decrements HL afterwards
+pub fn LD_HLD_A(cpu: *CPU) void {
+    const HL = cpu.getHL();
+
+    cpu.a = cpu.memoryRead(HL);
+    cpu.setHL(HL-1);
+}
+
+/// Gets value from accumulator and writes to memory at address HL. Increments HL afterwards
+pub fn LD_A_HLI(cpu: *CPU) void {
+    const HL = cpu.getHL();
+
+    cpu.memoryWrite(HL, cpu.a);
+    cpu.setHL(HL+1);
+}
+
+/// Gets value from accumulator and writes to memory at address HL. Decrements HL afterwards
+pub fn LD_A_HLD(cpu: *CPU) void {
+    const HL = cpu.getHL();
+
+    cpu.memoryWrite(HL, cpu.a);
+    cpu.setHL(HL-1);
+}
 
 // ---
 // Miscellaneous Instructions
