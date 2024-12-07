@@ -46,6 +46,11 @@ pub fn getSecondNibble(value: u8) u4 {
     return @truncate(value);
 }
 
+/// Joins two bytes together to make a 16-bit value
+pub fn concatBytes(lower: u8, higher: u8) u16 {
+    return @as(u16, higher) << 8 | lower;
+}
+
 // ---
 // Tests
 // ---
@@ -97,4 +102,11 @@ test "getSecondNibble" {
     try expectEqual(0xF, getSecondNibble(0xFF));
     try expectEqual(0x2, getSecondNibble(0x12));
     try expectEqual(0x1, getSecondNibble(0x21));
+}
+
+test "concatBytes" {
+    try expectEqual(0xFF0F, concatBytes(0x0F, 0xFF));
+    try expectEqual(0x32EC, concatBytes(0xEC, 0x32));
+    try expectEqual(0x9FA1, concatBytes(0xA1, 0x9F));
+    try expectEqual(0x0001, concatBytes(0x01, 0x00));
 }
