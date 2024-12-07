@@ -494,6 +494,7 @@ pub fn RST(cpu: *CPU, vec: u8) void {
 // Stack Operation Instructions
 // ---
 
+/// Adds SP to HL
 pub fn ADD_HL_SP(cpu: *CPU) void {
     const originalValue = cpu.getHL();
     const result = @addWithOverflow(originalValue, cpu.sp);
@@ -505,6 +506,7 @@ pub fn ADD_HL_SP(cpu: *CPU) void {
     cpu.setCarry(result[1]);
 }
 
+/// Adds signed 8-bit value to SP
 pub fn ADD_SP_e8(cpu: *CPU, value: i8) void {
     const originalValue = cpu.sp;
     const result = @addWithOverflow(cpu.sp, value);
@@ -517,23 +519,28 @@ pub fn ADD_SP_e8(cpu: *CPU, value: i8) void {
     cpu.setCarry(result[1]);
 }
 
+/// Decrements stack pointer
 pub fn DEC_SP(cpu: *CPU) void {
     cpu.sp -%= 1;
 }
 
+/// Increments stack pointer
 pub fn INC_SP(cpu: *CPU) void {
     cpu.sp +%= 1;
 }
 
+/// Loads stack pointer with 16-bit value
 pub fn LD_SP_n16(cpu: *CPU, value: u16) void {
     cpu.sp = value;
 }
 
+/// Writes SP & $FF to address and SP >> 8 to address+1
 pub fn LD_n16_SP(cpu: *CPU, address: u16) void {
     cpu.memoryWrite(address, cpu.sp & 0xFF);
     cpu.memoryWrite(address + 1, (cpu.sp >> 8) & 0xFF);
 }
 
+/// Adds signed 8-bit value to sp and stores result in HL
 pub fn LD_HL_SP(cpu: *CPU, value: i8) void {
     const originalValue = cpu.sp;
     const result = @addWithOverflow(originalValue, value);
@@ -545,6 +552,7 @@ pub fn LD_HL_SP(cpu: *CPU, value: i8) void {
     cpu.setCarry(result[1]);
 }
 
+/// Loads HL into SP
 pub fn LD_SP_HL(cpu: *CPU) void {
     cpu.sp = cpu.getHL();
 }
@@ -554,28 +562,16 @@ pub fn POP(cpu: *CPU, comptime register: [2]u8) void {
     const case = stringToEnum(Register, register);
     switch (case) {
         Register.AF => {
-            cpu.f = cpu.memoryRead(cpu.sp);
-            cpu.sp +%= 1;
-            cpu.a = cpu.memoryRead(cpu.sp);
-            cpu.sp +%= 1;
+            cpu.setAF(cpu.popStack16());
         },
         Register.BC => {
-            cpu.c = cpu.memoryRead(cpu.sp);
-            cpu.sp +%= 1;
-            cpu.b = cpu.memoryRead(cpu.sp);
-            cpu.sp +%= 1;
+            cpu.setBC(cpu.popStack16());
         },
         Register.DE => {
-            cpu.e = cpu.memoryRead(cpu.sp);
-            cpu.sp +%= 1;
-            cpu.d = cpu.memoryRead(cpu.sp);
-            cpu.sp +%= 1;
+            cpu.setDE(cpu.popStack16());
         },
         Register.HL => {
-            cpu.l = cpu.memoryRead(cpu.sp);
-            cpu.sp +%= 1;
-            cpu.h = cpu.memoryRead(cpu.sp);
-            cpu.sp +%= 1;
+            cpu.setHL(cpu.popStack16());
         },
         else => {
             @panic("Invalid register given for POP operation. Must be AF, BC, DE or HL");
@@ -588,28 +584,16 @@ pub fn PUSH(cpu: *CPU, comptime register: [2]u8) void {
     const case = stringToEnum(Register, register);
     switch (case) {
         Register.AF => {
-            cpu.sp -%= 1;
-            cpu.memoryWrite(cpu.sp, cpu.a);
-            cpu.sp -%= 1;
-            cpu.memoryWrite(cpu.sp, cpu.f);
+            cpu.pushToStack16(cpu.getAF());
         },
         Register.BC => {
-            cpu.sp -%= 1;
-            cpu.memoryWrite(cpu.sp, cpu.b);
-            cpu.sp -%= 1;
-            cpu.memoryWrite(cpu.sp, cpu.c);
+            cpu.pushToStack16(cpu.getBC());
         },
         Register.DE => {
-            cpu.sp -%= 1;
-            cpu.memoryWrite(cpu.sp, cpu.d);
-            cpu.sp -%= 1;
-            cpu.memoryWrite(cpu.sp, cpu.e);
+            cpu.pushToStack16(cpu.getDE());
         },
         Register.HL => {
-            cpu.sp -%= 1;
-            cpu.memoryWrite(cpu.sp, cpu.h);
-            cpu.sp -%= 1;
-            cpu.memoryWrite(cpu.sp, cpu.l);
+            cpu.pushToStack16(cpu.getHL());
         },
         else => {
             @panic("Invalid register given for PUSH operation. Must be AF, BC, DE or HL");
