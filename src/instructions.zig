@@ -149,9 +149,10 @@ pub fn ADD16(cpu: *CPU, value: u16) void {
 }
 
 /// Decrements value in 16-bit register
-pub fn DEC16(cpu: *CPU, comptime register: [2]u8) void {
+pub fn DEC16(cpu: *CPU, comptime register: []const u8) void {
     const case = stringToEnum(Register, register);
-    switch (case) {
+    const reg = case orelse @panic("Invalid register given for DEC16 operation. Must be AF, BC, DE or HL");
+    switch (reg) {
         Register.AF => {
             cpu.setAF(cpu.getAF()-%1);
         },
@@ -163,17 +164,15 @@ pub fn DEC16(cpu: *CPU, comptime register: [2]u8) void {
         },
         Register.HL => {
             cpu.setHL(cpu.getHL()-%1);
-        },
-        else => {
-            @panic("Invalid register given for LD operation. Must be AF, BC, DE or HL");
         }
     }
 }
 
 /// Increments value in 16-bit register
-pub fn INC16(cpu: *CPU, comptime register: [2]u8) void {
+pub fn INC16(cpu: *CPU, comptime register: []const u8) void {
     const case = stringToEnum(Register, register);
-    switch (case) {
+    const reg = case orelse @panic("Invalid register given for INC16 operation. Must be AF, BC, DE or HL");
+    switch (reg) {
         Register.AF => {
             cpu.setAF(cpu.getAF()+%1);
         },
@@ -185,9 +184,6 @@ pub fn INC16(cpu: *CPU, comptime register: [2]u8) void {
         },
         Register.HL => {
             cpu.setHL(cpu.getHL()+%1);
-        },
-        else => {
-            @panic("Invalid register given for LD operation. Must be AF, BC, DE or HL");
         }
     }
 }
@@ -368,9 +364,10 @@ pub fn LD_r8(reg: *u8, value: u8) void {
 }
 
 /// Loads 16-bit value into 16-bit register
-pub fn LD_r16(cpu: *CPU, value: u16, comptime register: [2]u8) void {
+pub fn LD_r16(cpu: *CPU, value: u16, comptime register: []const u8) void {
     const case = stringToEnum(Register, register);
-    switch (case) {
+    const reg = case orelse @panic("Invalid register given for LD operation. Must be AF, BC, DE or HL");
+    switch (reg) {
         Register.AF => {
             cpu.setAF(value);
         },
@@ -382,9 +379,6 @@ pub fn LD_r16(cpu: *CPU, value: u16, comptime register: [2]u8) void {
         },
         Register.HL => {
             cpu.setHL(value);
-        },
-        else => {
-            @panic("Invalid register given for LD operation. Must be AF, BC, DE or HL");
         }
     }
 }
@@ -587,8 +581,8 @@ pub fn LD_SP_n16(cpu: *CPU, value: u16) void {
 
 /// Writes SP & $FF to address and SP >> 8 to address+1
 pub fn LD_n16_SP(cpu: *CPU, address: u16) void {
-    cpu.memoryWrite(address, cpu.sp & 0xFF);
-    cpu.memoryWrite(address + 1, (cpu.sp >> 8) & 0xFF);
+    cpu.memoryWrite(address, @truncate(cpu.sp));
+    cpu.memoryWrite(address + 1, @truncate(cpu.sp >> 8));
 }
 
 /// Adds signed 8-bit value to sp and stores result in HL
@@ -609,9 +603,10 @@ pub fn LD_SP_HL(cpu: *CPU) void {
 }
 
 /// Reads 16-bit register from stack
-pub fn POP(cpu: *CPU, comptime register: [2]u8) void {
+pub fn POP(cpu: *CPU, comptime register: []const u8) void {
     const case = stringToEnum(Register, register);
-    switch (case) {
+    const reg = case orelse @panic("Invalid register given for POP operation. Must be AF, BC, DE or HL");
+    switch (reg) {
         Register.AF => {
             cpu.setAF(cpu.popStack16());
         },
@@ -623,17 +618,15 @@ pub fn POP(cpu: *CPU, comptime register: [2]u8) void {
         },
         Register.HL => {
             cpu.setHL(cpu.popStack16());
-        },
-        else => {
-            @panic("Invalid register given for POP operation. Must be AF, BC, DE or HL");
         }
     }
 }
 
 /// Writes 16-bit register to stack
-pub fn PUSH(cpu: *CPU, comptime register: [2]u8) void {
+pub fn PUSH(cpu: *CPU, comptime register: []const u8) void {
     const case = stringToEnum(Register, register);
-    switch (case) {
+    const reg = case orelse @panic("Invalid register given for PUSH operation. Must be AF, BC, DE or HL");
+    switch (reg) {
         Register.AF => {
             cpu.pushToStack16(cpu.getAF());
         },
@@ -645,9 +638,6 @@ pub fn PUSH(cpu: *CPU, comptime register: [2]u8) void {
         },
         Register.HL => {
             cpu.pushToStack16(cpu.getHL());
-        },
-        else => {
-            @panic("Invalid register given for PUSH operation. Must be AF, BC, DE or HL");
         }
     }
 }
