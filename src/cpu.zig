@@ -87,4 +87,19 @@ pub const CPU = packed struct {
     fn setCarry(self: *CPU, value: u1) void {
         self.f = bitutils.setBitInByte(self.f, 4, value);
     }
+
+    // Stack helpers
+    fn pushToStack16(self: *CPU, value: u16) void {
+        self.sp -%= 1;
+        self.memoryWrite(self.sp, @truncate(value >> 8));
+        self.sp -%= 1;
+        self.memoryWrite(self.sp, @truncate(value));
+    }
+    fn popStack16(self: *CPU) u16 {
+        const lo = self.memoryRead(self.sp);
+        self.sp +%= 1;
+        const hi = self.memoryRead(self.sp);
+        self.sp +%= 1;
+        return (hi << 8) | lo;
+    }
 };
