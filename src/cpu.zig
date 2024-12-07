@@ -105,7 +105,7 @@ pub const CPU = packed struct {
     }
 };
 
-/// Executes a single opcode
+/// Executes a single opcode. Returns number of cycles
 pub fn fetchAndExecute(cpu: *CPU) usize {
     const opcode = cpu.memoryRead(cpu.pc);
     cpu.pc += 1;
@@ -118,49 +118,70 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                     return 1;
                 },
                 0x1 => {
-
+                    const value = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+1));
+                    cpu.pc += 2;
+                    instructions.LD_r16(cpu, value, "BC");
+                    return 3;
                 },
                 0x2 => {
-
+                    instructions.LD_n16_A(cpu, cpu.getBC());
+                    return 2;
                 },
                 0x3 => {
-
+                    instructions.INC16(cpu, "BC");
+                    return 2;
                 },
                 0x4 => {
-
+                    instructions.INC8(cpu, &cpu.b);
+                    return 1;
                 },
                 0x5 => {
-
+                    instructions.DEC8(cpu, &cpu.b);
+                    return 1;
                 },
                 0x6 => {
-
+                    instructions.LD_r8(&cpu.b, cpu.memoryRead(cpu.pc));
+                    cpu += 1;
+                    return 2;
                 },
                 0x7 => {
-
+                    instructions.RLCA(cpu);
+                    return 1;
                 },
                 0x8 => {
-
+                    const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+1));
+                    cpu.pc += 2;
+                    instructions.LD_n16_SP(cpu, address);
+                    return 5;
                 },
                 0x9 => {
-
+                    instructions.ADD16(cpu, cpu.getBC());
+                    return 2;
                 },
                 0xA => {
-
+                    instructions.LD_r8(&cpu.a, cpu.memoryRead(cpu.getBC()));
+                    return 2;
                 },
                 0xB => {
-
+                    instructions.DEC16(cpu, "BC");
+                    return 2;
                 },
                 0xC => {
-
+                    instructions.INC8(cpu, &cpu.c);
+                    return 1;
                 },
                 0xD => {
-
+                    instructions.DEC8(cpu, &cpu.c);
+                    return 1;
                 },
                 0xE => {
-
+                    instructions.LD_r8(&cpu.c, cpu.memoryRead(cpu.pc));
+                    cpu += 1;
+                    return 2;
                 },
                 0xF => {
-
+                    instructions.RRCA(cpu);
+                    return 1;
                 },
                 else => {
                     @panic("Invalid opcode");
@@ -998,7 +1019,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
     }
 }
 
-/// Executes a single opcode which has been prefixed with $CB
+/// Executes a single opcode which has been prefixed with $CB. Returns number of cycles
 fn fetchAndExecuteCB(cpu: *CPU) usize {
     const opcode = cpu.memoryRead(cpu.pc);
     cpu.pc += 1;
