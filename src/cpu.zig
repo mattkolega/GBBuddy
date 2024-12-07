@@ -1,7 +1,8 @@
 //! Implementation of Game Boy CPU (Sharp SM83)
 
 const bitutils = @import("bitutils.zig");
-const GameBoy = @import("GameBoy.zig").GameBoy;
+const GameBoy = @import("gameboy.zig").GameBoy;
+const instructions = @import("instructions.zig");
 
 pub const CPU = packed struct {
     // Registers
@@ -103,3 +104,1788 @@ pub const CPU = packed struct {
         return (hi << 8) | lo;
     }
 };
+
+/// Executes a single opcode
+pub fn fetchAndExecute(cpu: *CPU) usize {
+    const opcode = cpu.memoryRead(cpu.pc);
+    cpu.pc += 1;
+
+    switch (bitutils.getFirstNibble(opcode)) {
+        0x0 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+                    instructions.NOP();
+                    return 1;
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x1 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x2 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x3 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x4 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x5 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x6 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x7 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x8 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x9 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0xA => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0xB => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0xC => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0xD => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0xE => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0xF => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        else => {
+            @panic("Invalid Opcode");
+        }
+    }
+}
+
+/// Executes a single opcode which has been prefixed with $CB
+fn fetchAndExecuteCB(cpu: *CPU) usize {
+    const opcode = cpu.memoryRead(cpu.pc);
+    cpu.pc += 1;
+
+    switch (bitutils.getFirstNibble(opcode)) {
+        0x0 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x1 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x2 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x3 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x4 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x5 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x6 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x7 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x8 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0x9 => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0xA => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0xB => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0xC => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0xD => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0xE => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        0xF => {
+            switch (bitutils.getSecondNibble(opcode)) {
+                0x0 => {
+
+                },
+                0x1 => {
+
+                },
+                0x2 => {
+
+                },
+                0x3 => {
+
+                },
+                0x4 => {
+
+                },
+                0x5 => {
+
+                },
+                0x6 => {
+
+                },
+                0x7 => {
+
+                },
+                0x8 => {
+
+                },
+                0x9 => {
+
+                },
+                0xA => {
+
+                },
+                0xB => {
+
+                },
+                0xC => {
+
+                },
+                0xD => {
+
+                },
+                0xE => {
+
+                },
+                0xF => {
+
+                },
+                else => {
+                    @panic("Invalid opcode");
+                }
+            }
+        },
+        else => {
+            @panic("Invalid Opcode");
+        }
+    }
+}
