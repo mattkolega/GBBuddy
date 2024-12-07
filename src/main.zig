@@ -1,5 +1,12 @@
 const std = @import("std");
 
+const GameBoy = @import("gameboy.zig").GameBoy;
+
 pub fn main() !void {
-    std.debug.print("{s}\n", .{"Hello World!"});
+    var gb: GameBoy = undefined;
+    gb.init();
+
+    while (true) {
+        gb.run();
+    }
 }
