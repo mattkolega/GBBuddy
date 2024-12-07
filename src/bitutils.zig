@@ -35,6 +35,17 @@ pub fn setBitInByte(value: u8, comptime n: u3, bit: u1) u8 {
     return (value & ~(@as(u8, 1) << n)) | (@as(u8, bit) << n);
 }
 
+
+/// Returns first half-byte portion of a byte
+pub fn getFirstNibble(value: u8) u4 {
+    return @truncate(value >> 4);
+}
+
+/// Returns last half-byte portion of a byte
+pub fn getSecondNibble(value: u8) u4 {
+    return @truncate(value);
+}
+
 // ---
 // Tests
 // ---
@@ -71,4 +82,19 @@ test "setBitInByte" {
     try expectEqual(0b0010_1011, setBitInByte(0b1010_1011, 7, 0));
     try expectEqual(0b1010_1111, setBitInByte(0b1010_1011, 2, 1));
     try expectEqual(0b1010_1011, setBitInByte(0b1010_1011, 4, 0));
+}
+
+test "getFirstNibble" {
+    try expectEqual(0xF, getFirstNibble(0xF0));
+    try expectEqual(0xF, getFirstNibble(0xFF));
+    try expectEqual(0x1, getFirstNibble(0x12));
+    try expectEqual(0x2, getFirstNibble(0x21));
+}
+
+test "getSecondNibble" {
+    try expectEqual(0x0, getSecondNibble(0xF0));
+    try expectEqual(0x0, getSecondNibble(0x00));
+    try expectEqual(0xF, getSecondNibble(0xFF));
+    try expectEqual(0x2, getSecondNibble(0x12));
+    try expectEqual(0x1, getSecondNibble(0x21));
 }
