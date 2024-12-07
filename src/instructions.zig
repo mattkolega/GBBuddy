@@ -136,11 +136,11 @@ pub fn XOR(cpu: *CPU, value: u8) void {
 // 16-bit Arithmetic Instructions
 // ---
 
-/// Adds value to accumulator
+/// Adds value to HL
 pub fn ADD16(cpu: *CPU, value: u16) void {
-    const originalValue = cpu.a;
-    const addResult = @addWithOverflow(cpu.a, value);
-    cpu.a = addResult[0];
+    const originalValue = cpu.getHL();
+    const addResult = @addWithOverflow(originalValue, value);
+    cpu.setHL(addResult[0]);
 
     // Set flags
     cpu.setSubtract(0);
