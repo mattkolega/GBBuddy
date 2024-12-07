@@ -456,13 +456,13 @@ pub fn JP_CC(cpu: *CPU, address: u16, condition: bool) void {
 
 /// Performs a relative jump to an address
 pub fn JR(cpu: *CPU, offset: i8) void {
-    cpu.pc += offset;
+    cpu.pc +%= offset;
 }
 
 /// Performs a relative jump to an address if condition is met
 pub fn JR_CC(cpu: *CPU, offset: i8, condition: bool) void {
     if (condition) {
-        cpu.pc += offset;
+        cpu.pc +%= offset;
     }
 }
 
