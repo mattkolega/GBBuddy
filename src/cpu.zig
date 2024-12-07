@@ -26,8 +26,8 @@ pub const CPU = packed struct {
     }
 
     // Wrappers for MMU memory access
-    pub fn memoryRead(self: *CPU, address: u16) void {
-        self.gb.mmu.memoryRead(address);
+    pub fn memoryRead(self: *CPU, address: u16) u8 {
+        return self.gb.mmu.memoryRead(address);
     }
     pub fn memoryWrite(self: *CPU, address: u16, value: u8) void {
         self.gb.mmu.memoryWrite(address, value);
@@ -35,28 +35,28 @@ pub const CPU = packed struct {
 
     // 16-bit register helpers
     pub fn getAF(self: *CPU) u16 {
-        return self.a << 8 | self.b;
+        return bitutils.concatBytes(self.b, self.a);
     }
     pub fn setAF(self: *CPU, value: u16) void {
         self.a = @truncate(value >> 8);
         self.f = @truncate(value);
     }
     pub fn getBC(self: *CPU) u16 {
-        return self.b << 8 | self.c;
+        return bitutils.concatBytes(self.c, self.b);
     }
     pub fn setBC(self: *CPU, value: u16) void {
         self.b = @truncate(value >> 8);
         self.c = @truncate(value);
     }
     pub fn getDE(self: *CPU) u16 {
-        return self.d << 8 | self.e;
+        return bitutils.concatBytes(self.e, self.d);
     }
     pub fn setDE(self: *CPU, value: u16) void {
         self.d = @truncate(value >> 8);
         self.e = @truncate(value);
     }
     pub fn getHL(self: *CPU) u16 {
-        return self.h << 8 | self.l;
+        return bitutils.concatBytes(self.l, self.h);
     }
     pub fn setHL(self: *CPU, value: u16) void {
         self.h = @truncate(value >> 8);
@@ -108,7 +108,7 @@ pub const CPU = packed struct {
 /// Executes a single opcode. Returns number of cycles
 pub fn fetchAndExecute(cpu: *CPU) usize {
     const opcode = cpu.memoryRead(cpu.pc);
-    cpu.pc += 1;
+    cpu.pc +%= 1;
 
     switch (bitutils.getFirstNibble(opcode)) {
         0x0 => {
@@ -119,7 +119,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 },
                 0x1 => {
                     const value = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+1));
-                    cpu.pc += 2;
+                    cpu.pc +%= 2;
                     instructions.LD_r16(cpu, value, "BC");
                     return 3;
                 },
@@ -141,7 +141,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 },
                 0x6 => {
                     instructions.LD_r8(&cpu.b, cpu.memoryRead(cpu.pc));
-                    cpu += 1;
+                    cpu.pc +%= 1;
                     return 2;
                 },
                 0x7 => {
@@ -150,7 +150,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 },
                 0x8 => {
                     const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+1));
-                    cpu.pc += 2;
+                    cpu.pc +%= 2;
                     instructions.LD_n16_SP(cpu, address);
                     return 5;
                 },
@@ -176,16 +176,13 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 },
                 0xE => {
                     instructions.LD_r8(&cpu.c, cpu.memoryRead(cpu.pc));
-                    cpu += 1;
+                    cpu.pc +%= 1;
                     return 2;
                 },
                 0xF => {
                     instructions.RRCA(cpu);
                     return 1;
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x1 => {
@@ -238,9 +235,6 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x2 => {
@@ -293,9 +287,6 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x3 => {
@@ -348,9 +339,6 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x4 => {
@@ -403,9 +391,6 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x5 => {
@@ -458,9 +443,6 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x6 => {
@@ -513,9 +495,6 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x7 => {
@@ -568,9 +547,6 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x8 => {
@@ -623,9 +599,6 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x9 => {
@@ -678,9 +651,6 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0xA => {
@@ -733,9 +703,6 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0xB => {
@@ -788,9 +755,6 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0xC => {
@@ -843,9 +807,6 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0xD => {
@@ -898,9 +859,6 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0xE => {
@@ -953,9 +911,6 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0xF => {
@@ -1008,15 +963,10 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
-        else => {
-            @panic("Invalid Opcode");
-        }
     }
+    return 0;
 }
 
 /// Executes a single opcode which has been prefixed with $CB. Returns number of cycles
@@ -1075,9 +1025,6 @@ fn fetchAndExecuteCB(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x1 => {
@@ -1130,9 +1077,6 @@ fn fetchAndExecuteCB(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x2 => {
@@ -1185,9 +1129,6 @@ fn fetchAndExecuteCB(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x3 => {
@@ -1240,9 +1181,6 @@ fn fetchAndExecuteCB(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x4 => {
@@ -1295,9 +1233,6 @@ fn fetchAndExecuteCB(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x5 => {
@@ -1350,9 +1285,6 @@ fn fetchAndExecuteCB(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x6 => {
@@ -1405,9 +1337,6 @@ fn fetchAndExecuteCB(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x7 => {
@@ -1460,9 +1389,6 @@ fn fetchAndExecuteCB(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x8 => {
@@ -1515,9 +1441,6 @@ fn fetchAndExecuteCB(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0x9 => {
@@ -1570,9 +1493,6 @@ fn fetchAndExecuteCB(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0xA => {
@@ -1625,9 +1545,6 @@ fn fetchAndExecuteCB(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0xB => {
@@ -1680,9 +1597,6 @@ fn fetchAndExecuteCB(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0xC => {
@@ -1735,9 +1649,6 @@ fn fetchAndExecuteCB(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0xD => {
@@ -1790,9 +1701,6 @@ fn fetchAndExecuteCB(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0xE => {
@@ -1845,9 +1753,6 @@ fn fetchAndExecuteCB(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
         0xF => {
@@ -1900,13 +1805,7 @@ fn fetchAndExecuteCB(cpu: *CPU) usize {
                 0xF => {
 
                 },
-                else => {
-                    @panic("Invalid opcode");
-                }
             }
         },
-        else => {
-            @panic("Invalid Opcode");
-        }
     }
 }
