@@ -334,8 +334,25 @@ pub fn LD_r8(reg: *u8, value: u8) void {
 }
 
 /// Loads 16-bit value into 16-bit register
-pub fn LD_r16(reg: *u16, value: u16) void {
-    reg.* = value;
+pub fn LD_r16(cpu: *CPU, value: u16, comptime register: [2]u8) void {
+    const case = stringToEnum(Register, register);
+    switch (case) {
+        Register.AF => {
+            cpu.setAF(value);
+        },
+        Register.BC => {
+            cpu.setBC(value);
+        },
+        Register.DE => {
+            cpu.setDE(value);
+        },
+        Register.HL => {
+            cpu.setHL(value);
+        },
+        else => {
+            @panic("Invalid register given for LD operation. Must be AF, BC, DE or HL");
+        }
+    }
 }
 
 // Loads 8-bit value into byte pointed to by HL
