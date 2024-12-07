@@ -425,7 +425,73 @@ pub fn LD_A_HLD(cpu: *CPU) void {
 }
 
 // ---
-// Stack Operations
+// Jumps and Subroutines
+// ---
+
+/// Calls address
+pub fn CALL(cpu: *CPU, address: u16) void {
+    cpu.pushToStack16(cpu.pc);
+    cpu.pc = address;
+}
+
+/// Calls address if condition is met
+pub fn CALL_CC(cpu: *CPU, address: u16, condition: bool) void {
+    if (condition) {
+        cpu.pushToStack16(cpu.pc);
+        cpu.pc = address;
+    }
+}
+
+/// Jumps to an address
+pub fn JP(cpu: *CPU, address: u16) void {
+    cpu.pc = address;
+}
+
+/// Jumps to an address if condition is met
+pub fn JP_CC(cpu: *CPU, address: u16, condition: bool) void {
+    if (condition) {
+        cpu.pc = address;
+    }
+}
+
+/// Performs a relative jump to an address
+pub fn JR(cpu: *CPU, offset: i8) void {
+    cpu.pc += offset;
+}
+
+/// Performs a relative jump to an address if condition is met
+pub fn JR_CC(cpu: *CPU, offset: i8, condition: bool) void {
+    if (condition) {
+        cpu.pc += offset;
+    }
+}
+
+/// Returns from subroutine
+pub fn RET(cpu: *CPU) void {
+    cpu.pc = cpu.popStack16();
+}
+
+/// Returns from subroutine if condition is met
+pub fn RET_CC(cpu: *CPU, condition: bool) void {
+    if (condition) {
+        cpu.pc = cpu.popStack16();
+    }
+}
+
+/// Returns from subroutine and enables interrupts
+pub fn RETI(cpu: *CPU) void {
+    cpu.pc = cpu.popStack16();
+    cpu.ime = 1;
+}
+
+/// Calls address vec
+pub fn RST(cpu: *CPU, vec: u8) void {
+    cpu.pushToStack16(cpu.pc);
+    cpu.pc = vec;
+}
+
+// ---
+// Stack Operation Instructions
 // ---
 
 pub fn ADD_HL_SP(cpu: *CPU) void {
