@@ -148,14 +148,48 @@ pub fn ADD16(cpu: *CPU, value: u16) void {
     cpu.setCarry(addResult[1]);
 }
 
-/// Decrements value
-pub fn DEC16(value: *u16) void {
-    value.* -%= 1;
+/// Decrements value in 16-bit register
+pub fn DEC16(cpu: *CPU, comptime register: [2]u8) void {
+    const case = stringToEnum(Register, register);
+    switch (case) {
+        Register.AF => {
+            cpu.setAF(cpu.getAF()-%1);
+        },
+        Register.BC => {
+            cpu.setBC(cpu.getBC()-%1);
+        },
+        Register.DE => {
+            cpu.setDE(cpu.getDE()-%1);
+        },
+        Register.HL => {
+            cpu.setHL(cpu.getHL()-%1);
+        },
+        else => {
+            @panic("Invalid register given for LD operation. Must be AF, BC, DE or HL");
+        }
+    }
 }
 
-/// Increments value
-pub fn INC16(value: *u16) void {
-    value.* +%= 1;
+/// Increments value in 16-bit register
+pub fn INC16(cpu: *CPU, comptime register: [2]u8) void {
+    const case = stringToEnum(Register, register);
+    switch (case) {
+        Register.AF => {
+            cpu.setAF(cpu.getAF()+%1);
+        },
+        Register.BC => {
+            cpu.setBC(cpu.getBC()+%1);
+        },
+        Register.DE => {
+            cpu.setDE(cpu.getDE()+%1);
+        },
+        Register.HL => {
+            cpu.setHL(cpu.getHL()+%1);
+        },
+        else => {
+            @panic("Invalid register given for LD operation. Must be AF, BC, DE or HL");
+        }
+    }
 }
 
 // ---
