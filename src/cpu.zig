@@ -101,7 +101,7 @@ pub const CPU = packed struct {
         self.sp +%= 1;
         const hi = self.memoryRead(self.sp);
         self.sp +%= 1;
-        return (hi << 8) | lo;
+        return bitutils.concatBytes(lo, hi);
     }
 };
 
@@ -188,114 +188,177 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
         0x1 => {
             switch (bitutils.getSecondNibble(opcode)) {
                 0x0 => {
-
+                    instructions.STOP();
+                    return 2;
                 },
                 0x1 => {
-
+                    const value = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+1));
+                    cpu.pc +%= 2;
+                    instructions.LD_r16(cpu, value, "DE");
+                    return 3;
                 },
                 0x2 => {
-
+                    instructions.LD_n16_A(cpu, cpu.getDE());
+                    return 2;
                 },
                 0x3 => {
-
+                    instructions.INC16(cpu, "DE");
+                    return 2;
                 },
                 0x4 => {
-
+                    instructions.INC8(cpu, &cpu.d);
+                    return 1;
                 },
                 0x5 => {
-
+                    instructions.DEC8(cpu, &cpu.d);
+                    return 1;
                 },
                 0x6 => {
-
+                    instructions.LD_r8(&cpu.d, cpu.memoryRead(cpu.pc));
+                    cpu.pc +%= 1;
+                    return 2;
                 },
                 0x7 => {
-
+                    instructions.RLA(cpu);
+                    return 1;
                 },
                 0x8 => {
-
+                    instructions.JR(cpu, cpu.memoryRead(cpu.pc));
+                    cpu.pc +%= 1;
+                    return 3;
                 },
                 0x9 => {
-
+                    instructions.ADD16(cpu, cpu.getDE());
+                    return 2;
                 },
                 0xA => {
-
+                    instructions.LD_r8(&cpu.a, cpu.memoryRead(cpu.getDE()));
+                    return 2;
                 },
                 0xB => {
-
+                    instructions.DEC16(cpu, "DE");
+                    return 2;
                 },
                 0xC => {
-
+                    instructions.INC8(cpu, &cpu.e);
+                    return 1;
                 },
                 0xD => {
-
+                    instructions.DEC8(cpu, &cpu.e);
+                    return 1;
                 },
                 0xE => {
-
+                    instructions.LD_r8(&cpu.e, cpu.memoryRead(cpu.pc));
+                    cpu.pc +%= 1;
+                    return 2;
                 },
                 0xF => {
-
+                    instructions.RRA(cpu);
+                    return 1;
                 },
             }
         },
         0x2 => {
             switch (bitutils.getSecondNibble(opcode)) {
                 0x0 => {
-
+                    if (cpu.getZero() == 0) {
+                        instructions.JR(cpu, cpu.memoryRead(cpu.pc));
+                        cpu.pc +%= 1;
+                        return 3;
+                    } else {
+                        cpu.pc +%= 1;
+                        return 2;
+                    }
                 },
                 0x1 => {
-
+                    const value = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+1));
+                    cpu.pc +%= 2;
+                    instructions.LD_r16(cpu, value, "HL");
+                    return 3;
                 },
                 0x2 => {
-
+                    instructions.LD_HLI_A(cpu);
+                    return 2;
                 },
                 0x3 => {
-
+                    instructions.INC16(cpu, "HL");
+                    return 2;
                 },
                 0x4 => {
-
+                    instructions.INC8(cpu, &cpu.h);
+                    return 1;
                 },
                 0x5 => {
-
+                    instructions.DEC8(cpu, &cpu.h);
+                    return 1;
                 },
                 0x6 => {
-
+                    instructions.LD_r8(&cpu.h, cpu.memoryRead(cpu.pc));
+                    cpu.pc +%= 1;
+                    return 2;
                 },
                 0x7 => {
-
+                    instructions.DAA(cpu);
+                    return 1;
                 },
                 0x8 => {
-
+                    if (cpu.getZero() == 1) {
+                        instructions.JR(cpu, cpu.memoryRead(cpu.pc));
+                        cpu.pc +%= 1;
+                        return 3;
+                    } else {
+                        cpu.pc +%= 1;
+                        return 2;
+                    }
                 },
                 0x9 => {
-
+                    instructions.ADD16(cpu, cpu.getHL());
+                    return 2;
                 },
                 0xA => {
-
+                    instructions.LD_A_HLI(cpu);
+                    return 2;
                 },
                 0xB => {
-
+                    instructions.DEC16(cpu, "HL");
+                    return 2;
                 },
                 0xC => {
-
+                    instructions.INC8(cpu, &cpu.l);
+                    return 1;
                 },
                 0xD => {
-
+                    instructions.DEC8(cpu, &cpu.l);
+                    return 1;
                 },
                 0xE => {
-
+                    instructions.LD_r8(&cpu.l, cpu.memoryRead(cpu.pc));
+                    cpu.pc +%= 1;
+                    return 2;
                 },
                 0xF => {
-
+                    instructions.CPL(cpu);
+                    return 1;
                 },
             }
         },
         0x3 => {
             switch (bitutils.getSecondNibble(opcode)) {
                 0x0 => {
-
+                    if (cpu.getCarry() == 0) {
+                        instructions.JR(cpu, cpu.memoryRead(cpu.pc));
+                        cpu.pc +%= 1;
+                        return 3;
+                    } else {
+                        cpu.pc +%= 1;
+                        return 2;
+                    }
                 },
                 0x1 => {
-
+                    const value = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+1));
+                    cpu.pc +%= 2;
+                    instructions.LD_SP_n16(cpu, value, "SP");
+                    return 3;
                 },
                 0x2 => {
 
