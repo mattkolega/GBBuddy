@@ -361,254 +361,339 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                     return 3;
                 },
                 0x2 => {
-
+                    instructions.LD_HLD_A(cpu);
+                    return 2;
                 },
                 0x3 => {
-
+                    instructions.INC16(cpu, "SP");
+                    return 2;
                 },
                 0x4 => {
-
+                    instructions.INC16(cpu, "HL");
+                    return 3;
                 },
                 0x5 => {
-
+                    instructions.DEC16(cpu, "HL");
+                    return 3;
                 },
                 0x6 => {
-
+                    instructions.LD_HL(cpu, cpu.memoryRead(cpu.pc));
+                    cpu +%= 1;
+                    return 3;
                 },
                 0x7 => {
-
+                    instructions.SCF(cpu);
+                    return 1;
                 },
                 0x8 => {
-
+                    if (cpu.getCarry() == 1) {
+                        instructions.JR(cpu, cpu.memoryRead(cpu.pc));
+                        cpu.pc +%= 1;
+                        return 3;
+                    } else {
+                        cpu.pc +%= 1;
+                        return 2;
+                    }
                 },
                 0x9 => {
-
+                    instructions.ADD_HL_SP(cpu);
+                    return 2;
                 },
                 0xA => {
-
+                    instructions.LD_A_HLD(cpu);
+                    return 2;
                 },
                 0xB => {
-
+                    instructions.DEC16(cpu, "SP");
+                    return 2;
                 },
                 0xC => {
-
+                    instructions.INC8(cpu, &cpu.a);
+                    return 1;
                 },
                 0xD => {
-
+                    instructions.DEC8(cpu, &cpu.a);
+                    return 1;
                 },
                 0xE => {
-
+                    instructions.LD_A_n16(cpu, cpu.a);
+                    return 2;
                 },
                 0xF => {
-
+                    instructions.CCF(cpu);
+                    return 1;
                 },
             }
         },
         0x4 => {
             switch (bitutils.getSecondNibble(opcode)) {
                 0x0 => {
-
+                    instructions.LD_r8(&cpu.b, cpu.b);
+                    return 1;
                 },
                 0x1 => {
-
+                    instructions.LD_r8(&cpu.b, cpu.c);
+                    return 1;
                 },
                 0x2 => {
-
+                    instructions.LD_r8(&cpu.b, cpu.d);
+                    return 1;
                 },
                 0x3 => {
-
+                    instructions.LD_r8(&cpu.b, cpu.e);
+                    return 1;
                 },
                 0x4 => {
-
+                    instructions.LD_r8(&cpu.b, cpu.h);
+                    return 1;
                 },
                 0x5 => {
-
+                    instructions.LD_r8(&cpu.b, cpu.l);
+                    return 1;
                 },
                 0x6 => {
-
+                    instructions.LD_r8(&cpu.b, cpu.memoryRead(cpu.getHL()));
+                    return 2;
                 },
                 0x7 => {
-
+                    instructions.LD_r8(&cpu.b, cpu.a);
+                    return 1;
                 },
                 0x8 => {
-
+                    instructions.LD_r8(&cpu.c, cpu.b);
+                    return 1;
                 },
                 0x9 => {
-
+                    instructions.LD_r8(&cpu.c, cpu.c);
+                    return 1;
                 },
                 0xA => {
-
+                    instructions.LD_r8(&cpu.c, cpu.d);
+                    return 1;
                 },
                 0xB => {
-
+                    instructions.LD_r8(&cpu.c, cpu.e);
+                    return 1;
                 },
                 0xC => {
-
+                    instructions.LD_r8(&cpu.c, cpu.h);
+                    return 1;
                 },
                 0xD => {
-
+                    instructions.LD_r8(&cpu.c, cpu.l);
+                    return 1;
                 },
                 0xE => {
-
+                    instructions.LD_r8(&cpu.c, cpu.memoryRead(cpu.getHL()));
+                    return 2;
                 },
                 0xF => {
-
+                    instructions.LD_r8(&cpu.c, cpu.a);
+                    return 1;
                 },
             }
         },
         0x5 => {
             switch (bitutils.getSecondNibble(opcode)) {
                 0x0 => {
-
+                    instructions.LD_r8(&cpu.d, cpu.b);
+                    return 1;
                 },
                 0x1 => {
-
+                    instructions.LD_r8(&cpu.d, cpu.c);
+                    return 1;
                 },
                 0x2 => {
-
+                    instructions.LD_r8(&cpu.d, cpu.d);
+                    return 1;
                 },
                 0x3 => {
-
+                    instructions.LD_r8(&cpu.d, cpu.e);
+                    return 1;
                 },
                 0x4 => {
-
+                    instructions.LD_r8(&cpu.d, cpu.h);
+                    return 1;
                 },
                 0x5 => {
-
+                    instructions.LD_r8(&cpu.d, cpu.l);
+                    return 1;
                 },
                 0x6 => {
-
+                    instructions.LD_r8(&cpu.d, cpu.memoryRead(cpu.getHL()));
+                    return 2;
                 },
                 0x7 => {
-
+                    instructions.LD_r8(&cpu.d, cpu.a);
+                    return 1;
                 },
                 0x8 => {
-
+                    instructions.LD_r8(&cpu.e, cpu.b);
+                    return 1;
                 },
                 0x9 => {
-
+                    instructions.LD_r8(&cpu.e, cpu.c);
+                    return 1;
                 },
                 0xA => {
-
+                    instructions.LD_r8(&cpu.e, cpu.d);
+                    return 1;
                 },
                 0xB => {
-
+                    instructions.LD_r8(&cpu.e, cpu.e);
+                    return 1;
                 },
                 0xC => {
-
+                    instructions.LD_r8(&cpu.e, cpu.h);
+                    return 1;
                 },
                 0xD => {
-
+                    instructions.LD_r8(&cpu.e, cpu.l);
+                    return 1;
                 },
                 0xE => {
-
+                    instructions.LD_r8(&cpu.e, cpu.memoryRead(cpu.getHL()));
+                    return 2;
                 },
                 0xF => {
-
+                    instructions.LD_r8(&cpu.e, cpu.a);
+                    return 1;
                 },
             }
         },
         0x6 => {
             switch (bitutils.getSecondNibble(opcode)) {
                 0x0 => {
-
+                    instructions.LD_r8(&cpu.h, cpu.b);
+                    return 1;
                 },
                 0x1 => {
-
+                    instructions.LD_r8(&cpu.h, cpu.c);
+                    return 1;
                 },
                 0x2 => {
-
+                    instructions.LD_r8(&cpu.h, cpu.d);
+                    return 1;
                 },
                 0x3 => {
-
+                    instructions.LD_r8(&cpu.h, cpu.e);
+                    return 1;
                 },
                 0x4 => {
-
+                    instructions.LD_r8(&cpu.h, cpu.h);
+                    return 1;
                 },
                 0x5 => {
-
+                    instructions.LD_r8(&cpu.h, cpu.l);
+                    return 1;
                 },
                 0x6 => {
-
+                    instructions.LD_r8(&cpu.h, cpu.memoryRead(cpu.getHL()));
+                    return 2;
                 },
                 0x7 => {
-
+                    instructions.LD_r8(&cpu.h, cpu.a);
+                    return 1;
                 },
                 0x8 => {
-
+                    instructions.LD_r8(&cpu.l, cpu.b);
+                    return 1;
                 },
                 0x9 => {
-
+                    instructions.LD_r8(&cpu.l, cpu.c);
+                    return 1;
                 },
                 0xA => {
-
+                    instructions.LD_r8(&cpu.l, cpu.d);
+                    return 1;
                 },
                 0xB => {
-
+                    instructions.LD_r8(&cpu.l, cpu.e);
+                    return 1;
                 },
                 0xC => {
-
+                    instructions.LD_r8(&cpu.l, cpu.h);
+                    return 1;
                 },
                 0xD => {
-
+                    instructions.LD_r8(&cpu.l, cpu.l);
+                    return 1;
                 },
                 0xE => {
-
+                    instructions.LD_r8(&cpu.l, cpu.memoryRead(cpu.getHL()));
+                    return 2;
                 },
                 0xF => {
-
+                    instructions.LD_r8(&cpu.l, cpu.a);
+                    return 1;
                 },
             }
         },
         0x7 => {
             switch (bitutils.getSecondNibble(opcode)) {
                 0x0 => {
-
+                    instructions.LD_HL(cpu, cpu.b);
+                    return 2;
                 },
                 0x1 => {
-
+                    instructions.LD_HL(cpu, cpu.c);
+                    return 2;
                 },
                 0x2 => {
-
+                    instructions.LD_HL(cpu, cpu.d);
+                    return 2;
                 },
                 0x3 => {
-
+                    instructions.LD_HL(cpu, cpu.e);
+                    return 2;
                 },
                 0x4 => {
-
+                    instructions.LD_HL(cpu, cpu.h);
+                    return 2;
                 },
                 0x5 => {
-
+                    instructions.LD_HL(cpu, cpu.l);
+                    return 2;
                 },
                 0x6 => {
-
+                    instructions.HALT();
+                    return 1;
                 },
                 0x7 => {
-
+                    instructions.LD_HL(cpu, cpu.a);
+                    return 2;
                 },
                 0x8 => {
-
+                    instructions.LD_r8(&cpu.a, cpu.b);
+                    return 1;
                 },
                 0x9 => {
-
+                    instructions.LD_r8(&cpu.a, cpu.c);
+                    return 1;
                 },
                 0xA => {
-
+                    instructions.LD_r8(&cpu.a, cpu.d);
+                    return 1;
                 },
                 0xB => {
-
+                    instructions.LD_r8(&cpu.a, cpu.e);
+                    return 1;
                 },
                 0xC => {
-
+                    instructions.LD_r8(&cpu.a, cpu.h);
+                    return 1;
                 },
                 0xD => {
-
+                    instructions.LD_r8(&cpu.a, cpu.l);
+                    return 1;
                 },
                 0xE => {
-
+                    instructions.LD_r8(&cpu.a, cpu.memoryRead(cpu.getHL()));
+                    return 2;
                 },
                 0xF => {
-
+                    instructions.LD_r8(&cpu.a, cpu.a);
+                    return 1;
                 },
             }
         },
