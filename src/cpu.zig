@@ -118,7 +118,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                     return 1;
                 },
                 0x1 => {
-                    const value = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+1));
+                    const value = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
                     cpu.pc +%= 2;
                     instructions.LD_r16(cpu, value, "BC");
                     return 3;
@@ -149,7 +149,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                     return 1;
                 },
                 0x8 => {
-                    const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+1));
+                    const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
                     cpu.pc +%= 2;
                     instructions.LD_n16_SP(cpu, address);
                     return 5;
@@ -192,7 +192,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                     return 2;
                 },
                 0x1 => {
-                    const value = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+1));
+                    const value = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
                     cpu.pc +%= 2;
                     instructions.LD_r16(cpu, value, "DE");
                     return 3;
@@ -271,7 +271,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                     }
                 },
                 0x1 => {
-                    const value = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+1));
+                    const value = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
                     cpu.pc +%= 2;
                     instructions.LD_r16(cpu, value, "HL");
                     return 3;
@@ -355,7 +355,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                     }
                 },
                 0x1 => {
-                    const value = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+1));
+                    const value = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
                     cpu.pc +%= 2;
                     instructions.LD_SP_n16(cpu, value, "SP");
                     return 3;
