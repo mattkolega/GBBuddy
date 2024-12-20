@@ -7,7 +7,7 @@ const bitutils = @import("bitutils.zig");
 const CPU = @import("cpu.zig").CPU;
 const log = @import("logger.zig");
 
-const Register = enum { AF, BC, DE, HL };
+const Register = enum { AF, BC, DE, HL, SP };
 
 // ---
 // 8-bit Arithmetic and Logic Instructions
@@ -151,7 +151,7 @@ pub fn ADD16(cpu: *CPU, value: u16) void {
 /// Decrements value in 16-bit register
 pub fn DEC16(cpu: *CPU, comptime register: []const u8) void {
     const case = stringToEnum(Register, register);
-    const reg = case orelse @panic("Invalid register given for DEC16 operation. Must be AF, BC, DE or HL");
+    const reg = case orelse @panic("Invalid register given for DEC16 operation. Must be AF, BC, DE, HL or SP");
     switch (reg) {
         Register.AF => {
             cpu.setAF(cpu.getAF()-%1);
@@ -164,6 +164,9 @@ pub fn DEC16(cpu: *CPU, comptime register: []const u8) void {
         },
         Register.HL => {
             cpu.setHL(cpu.getHL()-%1);
+        },
+        Register.SP => {
+            cpu.sp -%= 1;
         }
     }
 }
@@ -171,7 +174,7 @@ pub fn DEC16(cpu: *CPU, comptime register: []const u8) void {
 /// Increments value in 16-bit register
 pub fn INC16(cpu: *CPU, comptime register: []const u8) void {
     const case = stringToEnum(Register, register);
-    const reg = case orelse @panic("Invalid register given for INC16 operation. Must be AF, BC, DE or HL");
+    const reg = case orelse @panic("Invalid register given for INC16 operation. Must be AF, BC, DE, HL or SP");
     switch (reg) {
         Register.AF => {
             cpu.setAF(cpu.getAF()+%1);
@@ -184,6 +187,9 @@ pub fn INC16(cpu: *CPU, comptime register: []const u8) void {
         },
         Register.HL => {
             cpu.setHL(cpu.getHL()+%1);
+        },
+        Register.SP => {
+            cpu.sp +%= 1;
         }
     }
 }
@@ -533,16 +539,6 @@ pub fn ADD_SP_e8(cpu: *CPU, value: i8) void {
     cpu.setSubtract(0);
     cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry8(originalValue, value, '+')));
     cpu.setCarry(result[1]);
-}
-
-/// Decrements stack pointer
-pub fn DEC_SP(cpu: *CPU) void {
-    cpu.sp -%= 1;
-}
-
-/// Increments stack pointer
-pub fn INC_SP(cpu: *CPU) void {
-    cpu.sp +%= 1;
 }
 
 /// Loads stack pointer with 16-bit value
