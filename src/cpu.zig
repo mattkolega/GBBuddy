@@ -972,208 +972,353 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
         0xC => {
             switch (bitutils.getSecondNibble(opcode)) {
                 0x0 => {
-
+                    if (cpu.getZero() == 0) {
+                        instructions.RET(cpu);
+                        return 5;
+                    } else {
+                        return 2;
+                    }
                 },
                 0x1 => {
-
+                    instructions.POP(cpu, "BC");
+                    return 3;
                 },
                 0x2 => {
+                    if (cpu.getZero() == 0) {
+                        const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
+                        cpu.pc +%= 2;
+                        instructions.JP(cpu, address);
+                        return 4;
+                    } else {
+                        cpu.pc +%= 2;
+                        return 3;
+                    }
 
                 },
                 0x3 => {
-
+                    const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
+                    cpu.pc +%= 2;
+                    instructions.JP(cpu, address);
+                    return 4;
                 },
                 0x4 => {
-
+                    if (cpu.getZero() == 0) {
+                        const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
+                        cpu.pc +%= 2;
+                        instructions.CALL(cpu, address);
+                        return 6;
+                    } else {
+                        cpu.pc +%= 2;
+                        return 3;
+                    }
                 },
                 0x5 => {
-
+                    instructions.PUSH(cpu, "BC");
+                    return 4;
                 },
                 0x6 => {
-
+                    instructions.ADD8(cpu, cpu.memoryRead(cpu.pc));
+                    cpu.pc +%= 1;
+                    return 2;
                 },
                 0x7 => {
-
+                    instructions.RST(cpu, 0x00);
+                    return 4;
                 },
                 0x8 => {
-
+                    if (cpu.getZero() == 1) {
+                        instructions.RET(cpu);
+                        return 5;
+                    } else {
+                        return 2;
+                    }
                 },
                 0x9 => {
-
+                    instructions.RET(cpu);
+                    return 4;
                 },
                 0xA => {
-
+                    if (cpu.getZero() == 1) {
+                        const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
+                        cpu.pc +%= 2;
+                        instructions.JP(cpu, address);
+                        return 4;
+                    } else {
+                        cpu.pc +%= 2;
+                        return 3;
+                    }
                 },
                 0xB => {
-
+                    return 0;
                 },
                 0xC => {
-
+                    if (cpu.getZero() == 1) {
+                        const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
+                        cpu.pc +%= 2;
+                        instructions.CALL(cpu, address);
+                        return 6;
+                    } else {
+                        cpu.pc +%= 2;
+                        return 3;
+                    }
                 },
                 0xD => {
-
+                    const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
+                    cpu.pc +%= 2;
+                    instructions.CALL(cpu, address);
+                    return 6;
                 },
                 0xE => {
-
+                    instructions.ADC(cpu, cpu.memoryRead(cpu.pc));
+                    cpu.pc +%= 1;
+                    return 2;
                 },
                 0xF => {
-
+                    instructions.RST(cpu, 0x08);
+                    return 4;
                 },
             }
         },
         0xD => {
             switch (bitutils.getSecondNibble(opcode)) {
                 0x0 => {
-
+                    if (cpu.getCarry() == 0) {
+                        instructions.RET(cpu);
+                        return 5;
+                    } else {
+                        return 2;
+                    }
                 },
                 0x1 => {
-
+                    instructions.POP(cpu, "DE");
+                    return 3;
                 },
                 0x2 => {
+                    if (cpu.getCarry() == 0) {
+                        const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
+                        cpu.pc +%= 2;
+                        instructions.JP(cpu, address);
+                        return 4;
+                    } else {
+                        cpu.pc +%= 2;
+                        return 3;
+                    }
 
                 },
                 0x3 => {
-
+                    return 0;
                 },
                 0x4 => {
-
+                    if (cpu.getCarry() == 0) {
+                        const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
+                        cpu.pc +%= 2;
+                        instructions.CALL(cpu, address);
+                        return 6;
+                    } else {
+                        cpu.pc +%= 2;
+                        return 3;
+                    }
                 },
                 0x5 => {
-
+                    instructions.PUSH(cpu, "DE");
+                    return 4;
                 },
                 0x6 => {
-
+                    instructions.SUB(cpu, cpu.memoryRead(cpu.pc));
+                    cpu.pc +%= 1;
+                    return 2;
                 },
                 0x7 => {
-
+                    instructions.RST(cpu, 0x10);
+                    return 4;
                 },
                 0x8 => {
-
+                    if (cpu.getCarry() == 1) {
+                        instructions.RET(cpu);
+                        return 5;
+                    } else {
+                        return 2;
+                    }
                 },
                 0x9 => {
-
+                    instructions.RETI(cpu);
+                    return 4;
                 },
                 0xA => {
-
+                    if (cpu.getCarry() == 1) {
+                        const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
+                        cpu.pc +%= 2;
+                        instructions.JP(cpu, address);
+                        return 4;
+                    } else {
+                        cpu.pc +%= 2;
+                        return 3;
+                    }
                 },
                 0xB => {
-
+                    return 0;
                 },
                 0xC => {
-
+                    if (cpu.getCarry() == 1) {
+                        const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
+                        cpu.pc +%= 2;
+                        instructions.CALL(cpu, address);
+                        return 6;
+                    } else {
+                        cpu.pc +%= 2;
+                        return 3;
+                    }
                 },
                 0xD => {
-
+                    return 0;
                 },
                 0xE => {
-
+                    instructions.SBC(cpu, cpu.memoryRead(cpu.pc));
+                    cpu.pc +%= 1;
+                    return 2;
                 },
                 0xF => {
-
+                    instructions.RST(cpu, 0x18);
+                    return 4;
                 },
             }
         },
         0xE => {
             switch (bitutils.getSecondNibble(opcode)) {
                 0x0 => {
-
+                    instructions.LDH_n16_A(cpu, 0xFF00 & cpu.memoryRead(cpu.pc));
+                    cpu.pc +%= 1;
+                    return 3;
                 },
                 0x1 => {
-
+                    instructions.POP(cpu, "HL");
+                    return 3;
                 },
                 0x2 => {
-
+                    instructions.LDH_C_A(cpu);
+                    return 2;
                 },
                 0x3 => {
-
+                    return 0;
                 },
                 0x4 => {
-
+                    return 0;
                 },
                 0x5 => {
-
+                    instructions.PUSH(cpu, "HL");
+                    return 4;
                 },
                 0x6 => {
-
+                    instructions.AND(cpu, cpu.memoryRead(cpu.pc));
+                    cpu.pc +%= 1;
+                    return 2;
                 },
                 0x7 => {
-
+                    instructions.RST(cpu, 0x20);
+                    return 4;
                 },
                 0x8 => {
-
+                    instructions.ADD_SP_e8(cpu, cpu.memoryRead(cpu.pc));
+                    cpu.pc +%= 1;
+                    return 4;
                 },
                 0x9 => {
-
+                    instructions.JP(cpu, cpu.getHL());
+                    return 1;
                 },
                 0xA => {
-
+                    const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
+                    cpu +%= 2;
+                    instructions.LD_n16_A(cpu, address);
+                    return 4;
                 },
                 0xB => {
-
+                    return 0;
                 },
                 0xC => {
-
+                    return 0;
                 },
                 0xD => {
-
+                    return 0;
                 },
                 0xE => {
-
+                    instructions.XOR(cpu, cpu.memoryRead(cpu.pc));
+                    cpu.pc +%= 1;
+                    return 2;
                 },
                 0xF => {
-
+                    instructions.RST(cpu, 0x28);
+                    return 4;
                 },
             }
         },
         0xF => {
             switch (bitutils.getSecondNibble(opcode)) {
                 0x0 => {
-
+                    instructions.LDH_A_n16(cpu, 0xFF00 & cpu.memoryRead(cpu.pc));
+                    cpu.pc +%= 1;
+                    return 3;
                 },
                 0x1 => {
-
+                    instructions.POP(cpu, "AF");
+                    return 3;
                 },
                 0x2 => {
-
+                    instructions.LDH_A_C(cpu);
+                    return 2;
                 },
                 0x3 => {
-
+                    instructions.DI(cpu);
+                    return 1;
                 },
                 0x4 => {
-
+                    return 0;
                 },
                 0x5 => {
-
+                    instructions.PUSH(cpu, "AF");
+                    return 4;
                 },
                 0x6 => {
-
+                    instructions.OR(cpu, cpu.memoryRead(cpu.pc));
+                    cpu.pc +%= 1;
+                    return 2;
                 },
                 0x7 => {
-
+                    instructions.RST(cpu, 0x30);
+                    return 4;
                 },
                 0x8 => {
-
+                    instructions.LD_HL_SP(cpu, cpu.memoryRead(cpu.pc));
+                    cpu.pc +%= 1;
+                    return 3;
                 },
                 0x9 => {
-
+                    instructions.LD_SP_HL(cpu);
+                    return 2;
                 },
                 0xA => {
-
+                    const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
+                    cpu +%= 2;
+                    instructions.LD_A_n16(cpu, address);
+                    return 4;
                 },
                 0xB => {
-
+                    instructions.EI();
+                    return 1;
                 },
                 0xC => {
-
+                    return 0;
                 },
                 0xD => {
-
+                    return 0;
                 },
                 0xE => {
-
+                    instructions.CP(cpu, cpu.memoryRead(cpu.pc));
+                    return 2;
                 },
                 0xF => {
-
+                    instructions.RST(cpu, 0x38);
+                    return 4;
                 },
             }
         },
