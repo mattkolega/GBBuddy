@@ -425,8 +425,8 @@ pub fn LDH_n16_A(cpu: *CPU, address: u16) void {
 }
 
 /// Gets value from accumulator and writes to memory with address $FF00 + offset
-pub fn LDH_C_A(cpu: *CPU, offset: u8) void {
-    cpu.memoryWrite(0xFF00 + offset, cpu.a);
+pub fn LDH_C_A(cpu: *CPU) void {
+    cpu.memoryWrite(0xFF00 + cpu.c, cpu.a);
 }
 
 /// Gets value from memory at an address between $FF00 and $FFFF and writes to accumulator
@@ -439,8 +439,8 @@ pub fn LDH_A_n16(cpu: *CPU, address: u16) void {
 }
 
 /// Gets value from memory at address $FF00 + offset and writes to accumulator
-pub fn LDH_A_C(cpu: *CPU, offset: u8) void {
-    cpu.a = cpu.memoryRead(0xFF + offset);
+pub fn LDH_A_C(cpu: *CPU) void {
+    cpu.a = cpu.memoryRead(0xFF + cpu.c);
 }
 
 /// Gets value from memory at address stored in HL and writes to accumulator. Increments HL afterwards
