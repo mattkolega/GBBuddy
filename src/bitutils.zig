@@ -46,6 +46,11 @@ pub fn getSecondNibble(value: u8) u4 {
     return @truncate(value);
 }
 
+/// Swaps upper 4 bits and lower 4 bits of a byte
+pub fn swapNibbles(value: u8) u8 {
+    return @truncate(@as(u16, (value << 4)) | @as(u16, (value >> 4)));
+}
+
 /// Joins two bytes together to make a 16-bit value
 pub fn concatBytes(lower: u8, higher: u8) u16 {
     return @as(u16, higher) << 8 | lower;
@@ -102,6 +107,13 @@ test "getSecondNibble" {
     try expectEqual(0xF, getSecondNibble(0xFF));
     try expectEqual(0x2, getSecondNibble(0x12));
     try expectEqual(0x1, getSecondNibble(0x21));
+}
+
+test "swapNibbles" {
+    try expectEqual(0xF3, swapNibbles(0x3F));
+    try expectEqual(0x3F, swapNibbles(0xF3));
+    try expectEqual(0xFF, swapNibbles(0xFF));
+    try expectEqual(0x12, swapNibbles(0x21));
 }
 
 test "concatBytes" {
