@@ -205,22 +205,46 @@ pub fn BIT(cpu: *CPU, bitPos: u3, value: u8) void {
     cpu.setHalfCarry(1);
 }
 
-/// Resets bit to 0
-pub fn RES(bitPos: u3, value: *u8) void {
-    value.* &= ~bitPos;
+/// Resets bit in register to 0
+pub fn RES_r8(bitPos: u3, reg: *u8) void {
+    reg.* &= ~bitPos;
 }
 
-/// Sets bit to 1
-pub fn SET(bitPos: u3, value: *u8) void {
-    value.* |= bitPos;
+/// Resets bit in value at address HL to 0
+pub fn RES_HL(cpu: *CPU, bitPos: u3) void {
+    const newValue = cpu.memoryRead(cpu.getHL()) & ~bitPos;
+    cpu.memoryWrite(cpu.getHL(), newValue);
 }
 
-/// Swaps upper 4 bits and lower 4 bits of value
-pub fn SWAP(cpu: *CPU, value: *u8) void {
-    value.* = @truncate(@as(u16, (value.* << 4)) | @as(u16, (value.* >> 4)));
+/// Sets bit in register to 1
+pub fn SET_r8(bitPos: u3, reg: *u8) void {
+    reg.* |= bitPos;
+}
+
+/// Sets bit in value at address HL to 1
+pub fn SET_HL(cpu: *CPU, bitPos: u3) void {
+    const newValue = cpu.memoryRead(cpu.getHL()) | bitPos;
+    cpu.memoryWrite(cpu.getHL(), newValue);
+}
+
+/// Swaps upper 4 bits and lower 4 bits of register
+pub fn SWAP_r8(cpu: *CPU, reg: *u8) void {
+    reg.* = bitutils.swapNibbles(reg.*);
 
     // Set flags
-    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    if (reg.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
+    cpu.setCarry(0);
+}
+
+/// Swaps upper 4 bits and lower 4 bits of value at address HL
+pub fn SWAP_HL(cpu: *CPU) void {
+    const newValue = bitutils.swapNibbles(cpu.memoryRead(cpu.getHL()));
+    cpu.memoryWrite(cpu.getHL(), newValue);
+
+    // Set flags
+    if (newValue == 0) cpu.setZero(1) else cpu.setZero(0);
     cpu.setSubtract(0);
     cpu.setHalfCarry(0);
     cpu.setCarry(0);
