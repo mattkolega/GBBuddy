@@ -231,24 +231,37 @@ pub fn SWAP(cpu: *CPU, value: *u8) void {
 // ---
 
 /// Rotates carry flag + value left
-pub fn RL(cpu: *CPU, value: *u8) void {
+fn RL(cpu: *CPU, value: u8) u8 {
     const carryValue = cpu.getCarry();  // Get current carry flag value
-    cpu.setCarry(bitutils.getBitFromByte(value.*, 7));  // Set carry flag to leftmost bit
-    value.* = math.rotl(u8, value.*, @as(usize, 1));
-    value.* &= carryValue;
+    cpu.setCarry(bitutils.getBitFromByte(value, 7));  // Set carry flag to leftmost bit
+    value = math.rotl(u8, value, @as(usize, 1));
+    return value & carryValue;
+}
+
+/// Rotates carry flag + register left
+pub fn RL_r8(cpu: *CPU, reg: *u8) void {
+    reg.* = RL(cpu, reg.*);
 
     // Set flags
-    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    if (reg.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
+}
+
+/// Rotates carry flag + value at address HL left
+pub fn RL_HL(cpu: *CPU) void {
+    const newValue = RL(cpu, cpu.memoryRead(cpu.getHL()));
+    cpu.memoryWrite(cpu.getHL(), newValue);
+
+    // Set flags
+    if (newValue == 0) cpu.setZero(1) else cpu.setZero(0);
     cpu.setSubtract(0);
     cpu.setHalfCarry(0);
 }
 
 /// Rotates carry flag + accumulator left
 pub fn RLA(cpu: *CPU) void {
-    const carryValue = cpu.getCarry();  // Get current carry flag value
-    cpu.setCarry(bitutils.getBitFromByte(cpu.a, 7));  // Set carry flag to leftmost bit
-    cpu.a = math.rotl(u8, cpu.a, @as(usize, 1));
-    cpu.a &= carryValue;
+    cpu.a = RL(cpu, cpu.a);
 
     // Set flags
     cpu.setZero(0);
@@ -256,21 +269,36 @@ pub fn RLA(cpu: *CPU) void {
     cpu.setHalfCarry(0);
 }
 
+/// Rotates value left. Bit 7 is stored in carry flag
+fn RLC(cpu: *CPU, value: u8) u8 {
+    cpu.setCarry(bitutils.getBitFromByte(value, 7));  // Set carry flag to leftmost bit
+    return math.rotl(u8, value, @as(usize, 1));
+}
+
 /// Rotates register left. Bit 7 is stored in carry flag
-pub fn RLC(cpu: *CPU, value: *u8) void {
-    cpu.setCarry(bitutils.getBitFromByte(value.*, 7));  // Set carry flag to leftmost bit
-    value.* = math.rotl(u8, value.*, @as(usize, 1));
+pub fn RLC_r8(cpu: *CPU, reg: *u8) void {
+    reg.* = RLC(cpu, reg.*);
 
     // Set flags
-    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    if (reg.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
+}
+
+/// Rotates value at address HL left. Bit 7 is stored in carry flag
+pub fn RLC_HL(cpu: *CPU) void {
+    const newValue = RLC(cpu, cpu.memoryRead(cpu.getHL()));
+    cpu.memoryWrite(cpu.getHL(), newValue);
+
+    // Set flags
+    if (newValue == 0) cpu.setZero(1) else cpu.setZero(0);
     cpu.setSubtract(0);
     cpu.setHalfCarry(0);
 }
 
 /// Rotates accumulator left. Bit 7 is stored in carry flag
 pub fn RLCA(cpu: *CPU) void {
-    cpu.setCarry(bitutils.getBitFromByte(cpu.a, 7));  // Set carry flag to leftmost bit
-    cpu.a = math.rotl(u8, cpu.a, @as(usize, 1));
+    cpu.a = RLC(cpu, cpu.a);
 
     // Set flags
     cpu.setZero(0);
@@ -279,24 +307,37 @@ pub fn RLCA(cpu: *CPU) void {
 }
 
 /// Rotates value + carry flag right
-pub fn RR(cpu: *CPU, value: *u8) void {
+fn RR(cpu: *CPU, value: u8) u8 {
     const carryValue = cpu.getCarry();  // Get current carry flag value
-    cpu.setCarry(bitutils.getBitFromByte(value.*, 0));  // Set carry flag to right-most bit
-    value.* = math.rotr(u8, value.*, @as(usize, 1));
-    value.* &= (carryValue << 7);
+    cpu.setCarry(bitutils.getBitFromByte(value, 0));  // Set carry flag to right-most bit
+    value = math.rotr(u8, value, @as(usize, 1));
+    return value & (carryValue << 7);
+}
+
+/// Rotates register + carry flag right
+pub fn RR_r8(cpu: *CPU, reg: *u8) void {
+    reg.* = RR(cpu, reg.*);
 
     // Set flags
-    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    if (reg.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
+}
+
+/// Rotates value at address HL + carry flag right
+pub fn RR_HL(cpu: *CPU) void {
+    const newValue = RR(cpu, cpu.memoryRead(cpu.getHL()));
+    cpu.memoryWrite(cpu.getHL(), newValue);
+
+    // Set flags
+    if (newValue == 0) cpu.setZero(1) else cpu.setZero(0);
     cpu.setSubtract(0);
     cpu.setHalfCarry(0);
 }
 
 /// Rotates accumulator + carry flag right
 pub fn RRA(cpu: *CPU) void {
-    const carryValue = cpu.getCarry();  // Get current carry flag value
-    cpu.setCarry(bitutils.getBitFromByte(cpu.a, 0));  // Set carry flag to right-most bit
-    cpu.a = math.rotr(u8, cpu.a, @as(usize, 1));
-    cpu.a &= (carryValue << 7);
+    cpu.a = RR(cpu, cpu.a);
 
     // Set flags
     cpu.setZero(0);
@@ -305,20 +346,35 @@ pub fn RRA(cpu: *CPU) void {
 }
 
 /// Rotates value right. Bit 0 is stored in carry flag.
-pub fn RRC(cpu: *CPU, value: *u8) void {
-    cpu.setCarry(bitutils.getBitFromByte(value.*, 0));  // Set carry flag to right-most bit
-    value.* = math.rotr(u8, value.*, @as(usize, 1));
+fn RRC(cpu: *CPU, value: u8) u8 {
+    cpu.setCarry(bitutils.getBitFromByte(value, 0));  // Set carry flag to right-most bit
+    return math.rotr(u8, value, @as(usize, 1));
+}
+
+/// Rotates register right. Bit 0 is stored in carry flag.
+pub fn RRC_r8(cpu: *CPU, reg: *u8) void {
+    reg.* = RRC(cpu, reg.*);
 
     // Set flags
-    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    if (reg.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
+}
+
+/// Rotates value at address HL right. Bit 0 is stored in carry flag.
+pub fn RRC_HL(cpu: *CPU) void {
+    const newValue = RRC(cpu, cpu.memoryRead(cpu.getHL()));
+    cpu.memoryWrite(cpu.getHL(), newValue);
+
+    // Set flags
+    if (newValue == 0) cpu.setZero(1) else cpu.setZero(0);
     cpu.setSubtract(0);
     cpu.setHalfCarry(0);
 }
 
 /// Rotates accumulator right. Bit 0 is stored in carry flag.
 pub fn RRCA(cpu: *CPU) void {
-    cpu.setCarry(bitutils.getBitFromByte(cpu.a, 0));  // Set carry flag to right-most bit
-    cpu.a = math.rotr(u8, cpu.a, @as(usize, 1));
+    cpu.a = RRC(cpu, cpu.a);
 
     // Set flags
     cpu.setZero(0);
@@ -327,35 +383,83 @@ pub fn RRCA(cpu: *CPU) void {
 }
 
 /// Shifts left arithmetically. Bit 0 is zeroed
-pub fn SLA(cpu: *CPU, value: *u8) void {
-    cpu.setCarry(bitutils.getBitFromByte(value.*, 7));  // Set carry flag to leftmost bit
-    value.* = math.shl(u8, value.*, @as(usize, 1));
+fn SLA(cpu: *CPU, value: u8) u8 {
+    cpu.setCarry(bitutils.getBitFromByte(value, 7));  // Set carry flag to leftmost bit
+    return math.shl(u8, value, @as(usize, 1));
+}
+
+/// Shifts register left arithmetically. Bit 0 is zeroed
+pub fn SLA_r8(cpu: *CPU, reg: *u8) void {
+    reg.* = SLA(cpu, reg.*);
 
     // Set flags
-    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    if (reg.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
+}
+
+/// Shifts value at address HL left arithmetically. Bit 0 is zeroed
+pub fn SLA_HL(cpu: *CPU) void {
+    const newValue = SLA(cpu, cpu.memoryRead(cpu.getHL()));
+    cpu.memoryWrite(cpu.getHL(), newValue);
+
+    // Set flags
+    if (newValue == 0) cpu.setZero(1) else cpu.setZero(0);
     cpu.setSubtract(0);
     cpu.setHalfCarry(0);
 }
 
 /// Shifts right arithmetically. Bit 7 remains the same
-pub fn SRA(cpu: *CPU, value: *u8) void {
-    cpu.setCarry(bitutils.getBitFromByte(value.*, 7));  // Set carry flag to leftmost bit
-    value.* = math.shr(u8, value.*, @as(usize, 1));
-    value.* |= (cpu.getCarry() << 7);
+fn SRA(cpu: *CPU, value: u8) u8 {
+    cpu.setCarry(bitutils.getBitFromByte(value, 7));  // Set carry flag to leftmost bit
+    value = math.shr(u8, value, @as(usize, 1));
+    return value | (cpu.getCarry() << 7);
+}
+
+/// Shifts register right arithmetically. Bit 7 remains the same
+pub fn SRA_r8(cpu: *CPU, reg: *u8) void {
+    reg.* = SRA(cpu, reg.*);
 
     // Set flags
-    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    if (reg.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
+}
+
+/// Shifts value at address HL right arithmetically. Bit 7 remains the same
+pub fn SRA_HL(cpu: *CPU) void {
+    const newValue = SRA(cpu, cpu.memoryRead(cpu.getHL()));
+    cpu.memoryWrite(cpu.getHL(), newValue);
+
+    // Set flags
+    if (newValue == 0) cpu.setZero(1) else cpu.setZero(0);
     cpu.setSubtract(0);
     cpu.setHalfCarry(0);
 }
 
 /// Shifts right logically. Bit 7 is zeroed
-pub fn SRL(cpu: *CPU, value: *u8) void {
-    cpu.setCarry(bitutils.getBitFromByte(value.*, 7));  // Set carry flag to leftmost bit
-    value.* = math.shr(u8, value.*, @as(usize, 1));
+fn SRL(cpu: *CPU, value: u8) u8 {
+    cpu.setCarry(bitutils.getBitFromByte(value, 7));  // Set carry flag to leftmost bit
+    return math.shr(u8, value, @as(usize, 1));
+}
+
+/// Shifts register right logically. Bit 7 is zeroed
+pub fn SRL_r8(cpu: *CPU, reg: *u8) void {
+    reg.* = SRL(cpu, reg.*);
 
     // Set flags
-    if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    if (reg.* == 0) cpu.setZero(1) else cpu.setZero(0);
+    cpu.setSubtract(0);
+    cpu.setHalfCarry(0);
+}
+
+/// Shifts value at address HL right logically. Bit 7 is zeroed
+pub fn SRL_HL(cpu: *CPU) void {
+    const newValue = SRA(cpu, cpu.memoryRead(cpu.getHL()));
+    cpu.memoryWrite(cpu.getHL(), newValue);
+
+    // Set flags
+    if (newValue == 0) cpu.setZero(1) else cpu.setZero(0);
     cpu.setSubtract(0);
     cpu.setHalfCarry(0);
 }
