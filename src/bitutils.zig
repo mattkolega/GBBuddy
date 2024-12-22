@@ -35,7 +35,6 @@ pub fn setBitInByte(value: u8, comptime n: u3, bit: u1) u8 {
     return (value & ~(@as(u8, 1) << n)) | (@as(u8, bit) << n);
 }
 
-
 /// Returns first half-byte portion of a byte
 pub fn getFirstNibble(value: u8) u4 {
     return @truncate(value >> 4);
