@@ -223,7 +223,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                     return 1;
                 },
                 0x8 => {
-                    instructions.JR(cpu, cpu.memoryRead(cpu.pc));
+                    instructions.JR(cpu, @bitCast(cpu.memoryRead(cpu.pc)));
                     cpu.pc +%= 1;
                     return 3;
                 },
@@ -262,7 +262,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
             switch (bitutils.getSecondNibble(opcode)) {
                 0x0 => {
                     if (cpu.getZero() == 0) {
-                        instructions.JR(cpu, cpu.memoryRead(cpu.pc));
+                        instructions.JR(cpu, @bitCast(cpu.memoryRead(cpu.pc)));
                         cpu.pc +%= 1;
                         return 3;
                     } else {
@@ -303,7 +303,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 },
                 0x8 => {
                     if (cpu.getZero() == 1) {
-                        instructions.JR(cpu, cpu.memoryRead(cpu.pc));
+                        instructions.JR(cpu, @bitCast(cpu.memoryRead(cpu.pc)));
                         cpu.pc +%= 1;
                         return 3;
                     } else {
@@ -346,7 +346,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
             switch (bitutils.getSecondNibble(opcode)) {
                 0x0 => {
                     if (cpu.getCarry() == 0) {
-                        instructions.JR(cpu, cpu.memoryRead(cpu.pc));
+                        instructions.JR(cpu, @bitCast(cpu.memoryRead(cpu.pc)));
                         cpu.pc +%= 1;
                         return 3;
                     } else {
@@ -357,7 +357,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 0x1 => {
                     const value = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
                     cpu.pc +%= 2;
-                    instructions.LD_SP_n16(cpu, value, "SP");
+                    instructions.LD_SP_n16(cpu, value);
                     return 3;
                 },
                 0x2 => {
@@ -378,7 +378,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 },
                 0x6 => {
                     instructions.LD_HL(cpu, cpu.memoryRead(cpu.pc));
-                    cpu +%= 1;
+                    cpu.pc +%= 1;
                     return 3;
                 },
                 0x7 => {
@@ -387,7 +387,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 },
                 0x8 => {
                     if (cpu.getCarry() == 1) {
-                        instructions.JR(cpu, cpu.memoryRead(cpu.pc));
+                        instructions.JR(cpu, @bitCast(cpu.memoryRead(cpu.pc)));
                         cpu.pc +%= 1;
                         return 3;
                     } else {
@@ -1186,7 +1186,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
         0xE => {
             switch (bitutils.getSecondNibble(opcode)) {
                 0x0 => {
-                    instructions.LDH_n16_A(cpu, 0xFF00 & cpu.memoryRead(cpu.pc));
+                    instructions.LDH_n16_A(cpu, cpu.memoryRead(cpu.pc));
                     cpu.pc +%= 1;
                     return 3;
                 },
@@ -1218,7 +1218,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                     return 4;
                 },
                 0x8 => {
-                    instructions.ADD_SP_e8(cpu, cpu.memoryRead(cpu.pc));
+                    instructions.ADD_SP_e8(cpu, @bitCast(cpu.memoryRead(cpu.pc)));
                     cpu.pc +%= 1;
                     return 4;
                 },
@@ -1228,7 +1228,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 },
                 0xA => {
                     const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
-                    cpu +%= 2;
+                    cpu.pc +%= 2;
                     instructions.LD_n16_A(cpu, address);
                     return 4;
                 },
@@ -1255,7 +1255,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
         0xF => {
             switch (bitutils.getSecondNibble(opcode)) {
                 0x0 => {
-                    instructions.LDH_A_n16(cpu, 0xFF00 & cpu.memoryRead(cpu.pc));
+                    instructions.LDH_A_n16(cpu, cpu.memoryRead(cpu.pc));
                     cpu.pc +%= 1;
                     return 3;
                 },
@@ -1288,7 +1288,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                     return 4;
                 },
                 0x8 => {
-                    instructions.LD_HL_SP(cpu, cpu.memoryRead(cpu.pc));
+                    instructions.LD_HL_SP(cpu, @bitCast(cpu.memoryRead(cpu.pc)));
                     cpu.pc +%= 1;
                     return 3;
                 },
@@ -1298,7 +1298,7 @@ pub fn fetchAndExecute(cpu: *CPU) usize {
                 },
                 0xA => {
                     const address = bitutils.concatBytes(cpu.memoryRead(cpu.pc), cpu.memoryRead(cpu.pc+%1));
-                    cpu +%= 2;
+                    cpu.pc +%= 2;
                     instructions.LD_A_n16(cpu, address);
                     return 4;
                 },

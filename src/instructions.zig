@@ -58,7 +58,7 @@ pub fn CP(cpu: *CPU, value: u8) void {
     // Set flags
     if (subResult[0] == 0) cpu.setZero(1) else cpu.setZero(0);
     cpu.setSubtract(1);
-    cpu.setHalfCarry(bitutils.checkHalfCarry8(originalValue, value, '-'));
+    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry8(originalValue, value, '-')));
     cpu.setCarry(subResult[1]);
 }
 
@@ -258,8 +258,8 @@ pub fn SWAP_HL(cpu: *CPU) void {
 fn RL(cpu: *CPU, value: u8) u8 {
     const carryValue = cpu.getCarry();  // Get current carry flag value
     cpu.setCarry(bitutils.getBitFromByte(value, 7));  // Set carry flag to leftmost bit
-    value = math.rotl(u8, value, @as(usize, 1));
-    return value & carryValue;
+    const newValue = math.rotl(u8, value, @as(usize, 1));
+    return newValue & carryValue;
 }
 
 /// Rotates carry flag + register left
@@ -334,8 +334,8 @@ pub fn RLCA(cpu: *CPU) void {
 fn RR(cpu: *CPU, value: u8) u8 {
     const carryValue = cpu.getCarry();  // Get current carry flag value
     cpu.setCarry(bitutils.getBitFromByte(value, 0));  // Set carry flag to right-most bit
-    value = math.rotr(u8, value, @as(usize, 1));
-    return value & (carryValue << 7);
+    const newValue = math.rotr(u8, value, @as(usize, 1));
+    return newValue & (@as(u8, carryValue) << 7);
 }
 
 /// Rotates register + carry flag right
@@ -436,8 +436,8 @@ pub fn SLA_HL(cpu: *CPU) void {
 /// Shifts right arithmetically. Bit 7 remains the same
 fn SRA(cpu: *CPU, value: u8) u8 {
     cpu.setCarry(bitutils.getBitFromByte(value, 7));  // Set carry flag to leftmost bit
-    value = math.shr(u8, value, @as(usize, 1));
-    return value | (cpu.getCarry() << 7);
+    const newValue = math.shr(u8, value, @as(usize, 1));
+    return newValue | (@as(u8, cpu.getCarry()) << 7);
 }
 
 /// Shifts register right arithmetically. Bit 7 remains the same
@@ -513,6 +513,9 @@ pub fn LD_r16(cpu: *CPU, value: u16, comptime register: []const u8) void {
         },
         Register.HL => {
             cpu.setHL(value);
+        },
+        else => {
+            @panic("Unsupported register for LD operation. Must be AF, BC, DE or HL");
         }
     }
 }
@@ -544,31 +547,23 @@ pub fn LD_A_n16(cpu: *CPU, address: u16) void {
 
 /// Gets value from accumulator and writes to memory with address from a register.
 /// Address must be between $FF00 and $FFFF
-pub fn LDH_n16_A(cpu: *CPU, address: u16) void {
-    if (address >= 0xFF00 and address <= 0xFFFF) {
-        cpu.memoryWrite(address, cpu.a);
-    } else {
-        log.err("Error at LDH_n16_A - Address not within $FF00 and $FFFF");
-    }
+pub fn LDH_n16_A(cpu: *CPU, lowByte: u8) void {
+    cpu.memoryWrite(@as(u16, 0xFF00) & lowByte, cpu.a);
 }
 
 /// Gets value from accumulator and writes to memory with address $FF00 + offset
 pub fn LDH_C_A(cpu: *CPU) void {
-    cpu.memoryWrite(0xFF00 + cpu.c, cpu.a);
+    cpu.memoryWrite(@as(u16, 0xFF00) & cpu.c, cpu.a);
 }
 
 /// Gets value from memory at an address between $FF00 and $FFFF and writes to accumulator
-pub fn LDH_A_n16(cpu: *CPU, address: u16) void {
-    if (address >= 0xFF00 and address <= 0xFFFF) {
-        cpu.a = cpu.memoryRead(address);
-    } else {
-        log.err("Error at LDH_A_n16 - Address not within $FF00 and $FFFF");
-    }
+pub fn LDH_A_n16(cpu: *CPU, lowByte: u8) void {
+    cpu.a = cpu.memoryRead(@as(u16, 0xFF00) & lowByte);
 }
 
 /// Gets value from memory at address $FF00 + offset and writes to accumulator
 pub fn LDH_A_C(cpu: *CPU) void {
-    cpu.a = cpu.memoryRead(0xFF + cpu.c);
+    cpu.a = cpu.memoryRead(@as(u16, 0xFF00) & cpu.c);
 }
 
 /// Gets value from memory at address stored in HL and writes to accumulator. Increments HL afterwards
@@ -620,7 +615,7 @@ pub fn JP(cpu: *CPU, address: u16) void {
 
 /// Performs a relative jump to an address
 pub fn JR(cpu: *CPU, offset: i8) void {
-    cpu.pc +%= offset;
+    cpu.pc +%= @intCast(offset);
 }
 
 /// Returns from subroutine
@@ -659,13 +654,13 @@ pub fn ADD_HL_SP(cpu: *CPU) void {
 /// Adds signed 8-bit value to SP
 pub fn ADD_SP_e8(cpu: *CPU, value: i8) void {
     const originalValue = cpu.sp;
-    const result = @addWithOverflow(cpu.sp, value);
+    const result = @addWithOverflow(cpu.sp, @as(u8, @bitCast(value)));
     cpu.sp = result[0];
 
     // Set flags
     cpu.setZero(0);
     cpu.setSubtract(0);
-    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry8(originalValue, value, '+')));
+    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry16(originalValue, @as(u8, @bitCast(value)), '+')));
     cpu.setCarry(result[1]);
 }
 
@@ -683,12 +678,12 @@ pub fn LD_n16_SP(cpu: *CPU, address: u16) void {
 /// Adds signed 8-bit value to sp and stores result in HL
 pub fn LD_HL_SP(cpu: *CPU, value: i8) void {
     const originalValue = cpu.sp;
-    const result = @addWithOverflow(originalValue, value);
+    const result = @addWithOverflow(originalValue, @as(u8, @bitCast(value)));
     cpu.setHL(result[0]);
 
     cpu.setZero(0);
     cpu.setSubtract(0);
-    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry16(@truncate(cpu.sp), value, '+')));
+    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry16(cpu.sp, @as(u8, @bitCast(value)), '+')));
     cpu.setCarry(result[1]);
 }
 
@@ -713,6 +708,9 @@ pub fn POP(cpu: *CPU, comptime register: []const u8) void {
         },
         Register.HL => {
             cpu.setHL(cpu.popStack16());
+        },
+        else => {
+            @panic("Unsupported register for POP operation. Must be AF, BC, DE or HL");
         }
     }
 }
@@ -733,6 +731,9 @@ pub fn PUSH(cpu: *CPU, comptime register: []const u8) void {
         },
         Register.HL => {
             cpu.pushToStack16(cpu.getHL());
+        },
+        else => {
+            @panic("Unsupported register for PUSH operation. Must be AF, BC, DE or HL");
         }
     }
 }
@@ -770,7 +771,7 @@ pub fn DAA(cpu: *CPU) void {
         cpu.setCarry(1);
     }
 
-    if (cpu.getSubtract() == 0) cpu.a +% offset else cpu.a -% offset;
+    if (cpu.getSubtract() == 0) cpu.a +%= offset else cpu.a -%= offset;
 
     // Set flags
     if (cpu.a == 0) cpu.setZero(1) else cpu.setZero(0);
