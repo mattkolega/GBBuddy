@@ -22,7 +22,7 @@ pub fn ADC(cpu: *CPU, value: u8) void {
     // Set flags
     if (cpu.a == 0) cpu.setZero(1) else cpu.setZero(0);
     cpu.setSubtract(0);
-    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry8(originalValue, (value + cpu.getCarry()), '+')));
+    cpu.setHalfCarry(bitutils.checkHalfCarry8(originalValue, (value + cpu.getCarry()), '+'));
     cpu.setCarry(addResult[1]);
 }
 
@@ -35,7 +35,7 @@ pub fn ADD8(cpu: *CPU, value: u8) void {
     // Set flags
     if (cpu.a == 0) cpu.setZero(1) else cpu.setZero(0);
     cpu.setSubtract(0);
-    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry8(originalValue, value, '+')));
+    cpu.setHalfCarry(bitutils.checkHalfCarry8(originalValue, value, '+'));
     cpu.setCarry(addResult[1]);
 }
 
@@ -58,7 +58,7 @@ pub fn CP(cpu: *CPU, value: u8) void {
     // Set flags
     if (subResult[0] == 0) cpu.setZero(1) else cpu.setZero(0);
     cpu.setSubtract(1);
-    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry8(originalValue, value, '-')));
+    cpu.setHalfCarry(bitutils.checkHalfCarry8(originalValue, value, '-'));
     cpu.setCarry(subResult[1]);
 }
 
@@ -70,7 +70,7 @@ pub fn DEC8(cpu: *CPU, value: *u8) void {
     // Set flags
     if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
     cpu.setSubtract(1);
-    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry8(originalValue, 1, '-')));
+    cpu.setHalfCarry(bitutils.checkHalfCarry8(originalValue, 1, '-'));
 }
 
 /// Increments value
@@ -81,7 +81,7 @@ pub fn INC8(cpu: *CPU, value: *u8) void {
     // Set flags
     if (value.* == 0) cpu.setZero(1) else cpu.setZero(0);
     cpu.setSubtract(0);
-    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry8(originalValue, 1, '+')));
+    cpu.setHalfCarry(bitutils.checkHalfCarry8(originalValue, 1, '+'));
 }
 
 /// Bitwise OR of accumulator and value
@@ -104,7 +104,7 @@ pub fn SBC(cpu: *CPU, value: u8) void {
     // Set flags
     if (cpu.a == 0) cpu.setZero(1) else cpu.setZero(0);
     cpu.setSubtract(1);
-    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry8(originalValue, (value + cpu.getCarry()), '-')));
+    cpu.setHalfCarry(bitutils.checkHalfCarry8(originalValue, (value + cpu.getCarry()), '-'));
     cpu.setCarry(subResult[1]);
 }
 
@@ -117,7 +117,7 @@ pub fn SUB(cpu: *CPU, value: u8) void {
     // Set flags
     if (cpu.a == 0) cpu.setZero(1) else cpu.setZero(0);
     cpu.setSubtract(1);
-    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry8(originalValue, value, '-')));
+    cpu.setHalfCarry(bitutils.checkHalfCarry8(originalValue, value, '-'));
     cpu.setCarry(subResult[1]);
 }
 
@@ -144,7 +144,7 @@ pub fn ADD16(cpu: *CPU, value: u16) void {
 
     // Set flags
     cpu.setSubtract(0);
-    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry16(originalValue, value, '+')));
+    cpu.setHalfCarry(bitutils.checkHalfCarry16(originalValue, value, '+'));
     cpu.setCarry(addResult[1]);
 }
 
@@ -647,7 +647,7 @@ pub fn ADD_HL_SP(cpu: *CPU) void {
 
     // Set flags
     cpu.setSubtract(0);
-    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry16(originalValue, cpu.sp, '+')));
+    cpu.setHalfCarry(bitutils.checkHalfCarry16(originalValue, cpu.sp, '+'));
     cpu.setCarry(result[1]);
 }
 
@@ -660,7 +660,7 @@ pub fn ADD_SP_e8(cpu: *CPU, value: i8) void {
     // Set flags
     cpu.setZero(0);
     cpu.setSubtract(0);
-    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry16(originalValue, @as(u8, @bitCast(value)), '+')));
+    cpu.setHalfCarry(bitutils.checkHalfCarry16(originalValue, @as(u8, @bitCast(value)), '+'));
     cpu.setCarry(result[1]);
 }
 
@@ -683,7 +683,7 @@ pub fn LD_HL_SP(cpu: *CPU, value: i8) void {
 
     cpu.setZero(0);
     cpu.setSubtract(0);
-    cpu.setHalfCarry(@intFromBool(bitutils.checkHalfCarry16(cpu.sp, @as(u8, @bitCast(value)), '+')));
+    cpu.setHalfCarry(bitutils.checkHalfCarry16(cpu.sp, @as(u8, @bitCast(value)), '+'));
     cpu.setCarry(result[1]);
 }
 

@@ -3,22 +3,22 @@
 const log = @import("logger.zig");
 
 /// Check if half carry occurred in 8-bit arithmetic
-pub fn checkHalfCarry8(operand1: u8, operand2: u8, comptime operation: u8) bool {
+pub fn checkHalfCarry8(operand1: u8, operand2: u8, comptime operation: u8) u1 {
     if (operation == '+') {
-        return (((operand1 & 0xF) +% (operand2 & 0xF)) & 0x10) == 0x10;
+        return @intFromBool((((operand1 & 0xF) +% (operand2 & 0xF)) & 0x10) == 0x10);
     } else if (operation == '-'){
-        return (((operand1 & 0xF) -% (operand2 & 0xF)) & 0x10) == 0x10;
+        return @intFromBool((((operand1 & 0xF) -% (operand2 & 0xF)) & 0x10) == 0x10);
     } else {
         @panic("Unsupported operation type in checkHalfCarry8");
     }
 }
 
 /// Check if half carry occurred in 16-bit arithmetic
-pub fn checkHalfCarry16(operand1: u16, operand2: u16, comptime operation: u8) bool {
+pub fn checkHalfCarry16(operand1: u16, operand2: u16, comptime operation: u8) u1 {
     if (operation == '+') {
-        return (((operand1 & 0xFFF) +% (operand2 & 0xFFF)) & 0x1000) == 0x1000;
+        return @intFromBool((((operand1 & 0xFFF) +% (operand2 & 0xFFF)) & 0x1000) == 0x1000);
     } else if (operation == '-'){
-        return (((operand1 & 0xFFF) -% (operand2 & 0xFFF)) & 0x1000) == 0x1000;
+        return @intFromBool((((operand1 & 0xFFF) -% (operand2 & 0xFFF)) & 0x1000) == 0x1000);
     } else {
         @panic("Unsupported operation type in checkHalfCarry16");
     }
