@@ -200,7 +200,7 @@ pub fn INC16(cpu: *CPU, comptime register: []const u8) void {
 
 /// Checks if bit is set
 pub fn BIT(cpu: *CPU, bitPos: u3, value: u8) void {
-    if ((value & bitPos) == bitPos) cpu.setZero(1) else cpu.setZero(2);
+    if ((value & bitPos) == 0) cpu.setZero(1) else cpu.setZero(0);
     cpu.setSubtract(0);
     cpu.setHalfCarry(1);
 }
