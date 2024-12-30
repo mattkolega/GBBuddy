@@ -7,6 +7,9 @@ build/
 # macOS specific files
 .DS_Store
 
+# clangd directories
+.cache/
+
 # Prerequisites
 *.d
 
