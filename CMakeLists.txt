@@ -19,6 +19,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Add CMake modules
 include(FetchContent)
 
+# Get SDL3 for multimedia functionality
+FetchContent_Declare(
+    SDL3
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+    GIT_TAG preview-3.1.6
+)
+FetchContent_MakeAvailable(SDL3)
+
 # Get fmt library for formatting console output
 FetchContent_Declare(
     fmt
@@ -34,5 +42,6 @@ add_executable(gbbuddy
 # Link libraries to executable
 target_link_libraries(gbbuddy
     PRIVATE
+    SDL3::SDL3
     fmt::fmt
 )
