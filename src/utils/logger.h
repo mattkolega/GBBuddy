@@ -29,21 +29,26 @@ namespace Logger {
         }
     }
 
+    // Logs a message which is useful for debugging and isn't relevant to the user
     template<typename... Args>
     void debug(fmt::format_string<Args...> formatString, Args&&... args) {
         Logger::print("DEBUG", fg(fmt::color::light_golden_rod_yellow), formatString, std::forward<Args>(args)...);
     };
 
+    // Logs a general message which informs the user about the state of the program
     template<typename... Args>
     void info(fmt::format_string<Args...> formatString, Args&&... args) {
         Logger::print("INFO", fg(fmt::color::powder_blue), formatString, std::forward<Args>(args)...);
     };
 
+    // Logs a warning message which indicates that something may have gone wrong but isn't necessarily an error
     template<typename... Args>
     void warn(fmt::format_string<Args...> formatString, Args&&... args) {
         Logger::print("WARN", fg(fmt::color::orange), formatString, std::forward<Args>(args)...);
     };
 
+    // Logs an error message which indicates that something has gone wrong during program execution
+    // May or may not lead to program exit
     template<typename... Args>
     void err(fmt::format_string<Args...> formatString, Args&&... args) {
         Logger::print("ERROR", fg(fmt::color::red), formatString, std::forward<Args>(args)...);
