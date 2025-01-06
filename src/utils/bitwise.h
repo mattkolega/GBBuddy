@@ -16,7 +16,7 @@ namespace Bitwise {
     bool checkHalfCarrySub(uint16_t operand1, uint16_t operand2);
 
     // Gets n-th bit from an 8-bit value
-    uint8_t getBitInByte(uint8_t value);
+    uint8_t getBitInByte(uint8_t value, uint8_t n);
 
     // Modifies a specific bit in a 8-bit value
     uint8_t modifyBitInByte(uint8_t value, uint8_t n, uint8_t newVal);
