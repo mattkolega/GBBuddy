@@ -37,6 +37,8 @@ FetchContent_MakeAvailable(fmt)
 
 add_executable(gbbuddy
     src/main.cpp
+
+    src/core/mmu.cpp
 )
 
 # Link libraries to executable
