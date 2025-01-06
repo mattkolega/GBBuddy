@@ -39,6 +39,8 @@ add_executable(gbbuddy
     src/main.cpp
 
     src/core/mmu.cpp
+
+    src/utils/bitwise.cpp
 )
 
 # Link libraries to executable
