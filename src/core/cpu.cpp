@@ -60,6 +60,10 @@ void CPU::setZero(uint8_t value) {
     f = Bitwise::modifyBitInByte(f, 7, value);
 }
 
+void CPU::setZero(bool isValZero) {
+    f = Bitwise::modifyBitInByte(f, 7, isValZero ? 1 : 0);
+}
+
 uint8_t CPU::getSubtract() {
     return Bitwise::getBitInByte(f, 6);
 }
@@ -84,11 +88,11 @@ void CPU::setCarry(uint8_t value) {
     f = Bitwise::modifyBitInByte(f, 4, value);
 }
 
-void CPU::pushToStack16(uint8_t value) {
+void CPU::pushToStack16(uint16_t value) {
     sp--;
-    memoryWrite(sp, value);
+    memoryWrite(sp, (value >> 8) & 0xFF);
     sp--;
-    memoryWrite(sp, value);
+    memoryWrite(sp, value & 0xFF);
 }
 
 uint16_t CPU::popStack16() {
