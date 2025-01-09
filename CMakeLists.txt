@@ -7,10 +7,7 @@ project(
     LANGUAGES CXX
 )
 
-# Set standard to C++23
 set(CMAKE_CXX_STANDARD 23)
-
-# Turn off compiler extensions
 set(CMAKE_CXX_EXTENSIONS off)
 
 # Export compile_commands.json so intellisense works properly
@@ -38,14 +35,13 @@ FetchContent_MakeAvailable(fmt)
 add_executable(gbbuddy
     src/main.cpp
 
+    src/core/cpu.cpp
     src/core/mmu.cpp
-
-    src/utils/bitwise.cpp
 )
 
 # Link libraries to executable
 target_link_libraries(gbbuddy
     PRIVATE
-    SDL3::SDL3
     fmt::fmt
+    SDL3::SDL3
 )
