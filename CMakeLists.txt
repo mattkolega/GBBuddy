@@ -16,21 +16,26 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 # Add CMake modules
 include(FetchContent)
 
-# Get SDL3 for multimedia functionality
-FetchContent_Declare(
-    SDL3
-    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-    GIT_TAG preview-3.1.6
-)
-FetchContent_MakeAvailable(SDL3)
-
 # Get fmt library for formatting console output
 FetchContent_Declare(
     fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
     GIT_TAG 11.1.1
 )
-FetchContent_MakeAvailable(fmt)
+# Get SDL3 for multimedia functionality
+FetchContent_Declare(
+    SDL3
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+    GIT_TAG preview-3.1.6
+)
+# Get tinyfiledialogs for native dialogs
+FetchContent_Declare(
+    tinyfiledialogs
+    GIT_REPOSITORY https://git.code.sf.net/p/tinyfiledialogs/code
+    GIT_TAG 29c1b354d75825209adf8cc1979c425885a64d32
+)
+
+FetchContent_MakeAvailable(fmt SDL3 tinyfiledialogs)
 
 add_executable(gbbuddy
     src/main.cpp
@@ -39,9 +44,12 @@ add_executable(gbbuddy
     src/core/mmu.cpp
 )
 
+target_include_directories(gbbuddy PRIVATE
+    ${tinyfiledialogs_SOURCE_DIR}
+)
+
 # Link libraries to executable
-target_link_libraries(gbbuddy
-    PRIVATE
+target_link_libraries(gbbuddy PRIVATE
     fmt::fmt
     SDL3::SDL3
 )
