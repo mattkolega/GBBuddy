@@ -213,6 +213,16 @@ void CPU::ADD(uint16_t value) {
 }
 
 /**
+Bit Operation Instructions
+ */
+
+void CPU::BIT(uint8_t bitPos, uint8_t value) {
+    setZero((value & bitPos) == 0);
+    setSubtract(0);
+    setHalfCarry(1);
+}
+
+/**
 Load Instructions
  */
 
