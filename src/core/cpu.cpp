@@ -213,6 +213,37 @@ void CPU::ADD(uint16_t value) {
 }
 
 /**
+Jumps and Subroutines
+ */
+
+void CPU::CALL(uint16_t address) {
+    pushToStack16(pc);
+    pc = address;
+}
+
+void CPU::JP(uint16_t address) {
+    pc = address;
+}
+
+void CPU::JR(int8_t offset) {
+    pc += offset;
+}
+
+void CPU::RET() {
+    pc = popStack16();
+}
+
+void CPU::RETI() {
+    pc = popStack16();
+    ime = 1;
+}
+
+void CPU::RST(uint8_t vec) {
+    pushToStack16(pc);
+    pc = vec;
+}
+
+/**
 Miscellaneous Instructions
  */
 
