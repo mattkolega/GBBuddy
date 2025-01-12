@@ -59,14 +59,12 @@ private:
     // Flag getters/setters
     uint8_t getZero();
     void setZero(uint8_t value);
-    void setZero(bool isValZero);
     uint8_t getSubtract();
     void setSubtract(uint8_t value);
     uint8_t getHalfCarry();
     void setHalfCarry(uint8_t value);
     uint8_t getCarry();
     void setCarry(uint8_t value);
-    void setCarry(bool carryOccurred);
 
     // Stack helpers
     void pushToStack16(uint16_t value);
@@ -344,7 +342,7 @@ private:
 
         setSubtract(0);
         setHalfCarry(0);
-        setCarry(static_cast<uint8_t>(0));
+        setCarry(0);
     }
 
     /*

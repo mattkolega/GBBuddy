@@ -60,10 +60,6 @@ void CPU::setZero(uint8_t value) {
     f = Bitwise::modifyBitInByte(f, 7, value);
 }
 
-void CPU::setZero(bool isValZero) {
-    f = Bitwise::modifyBitInByte(f, 7, isValZero ? 1 : 0);
-}
-
 uint8_t CPU::getSubtract() {
     return Bitwise::getBitInByte(f, 6);
 }
@@ -86,10 +82,6 @@ uint8_t CPU::getCarry() {
 
 void CPU::setCarry(uint8_t value) {
     f = Bitwise::modifyBitInByte(f, 4, value);
-}
-
-void CPU::setCarry(bool carryOccurred) {
-    f = Bitwise::modifyBitInByte(f, 4, carryOccurred ? 1 : 0);
 }
 
 void CPU::pushToStack16(uint16_t value) {
@@ -140,7 +132,7 @@ void CPU::AND(uint8_t value) {
     setZero(a == 0);
     setSubtract(0);
     setHalfCarry(1);
-    setCarry(static_cast<uint8_t>(0));
+    setCarry(0);
 }
 
 void CPU::CP(uint8_t value) {
@@ -161,7 +153,7 @@ void CPU::OR(uint8_t value) {
     setZero(a == 0);
     setSubtract(0);
     setHalfCarry(0);
-    setCarry(static_cast<uint8_t>(0));
+    setCarry(0);
 }
 
 void CPU::SBC(uint8_t value) {
@@ -194,7 +186,7 @@ void CPU::XOR(uint8_t value) {
     setZero(a == 0);
     setSubtract(0);
     setHalfCarry(0);
-    setCarry(static_cast<uint8_t>(0));
+    setCarry(0);
 }
 
 /**
@@ -320,7 +312,7 @@ Miscellaneous Instructions
 void CPU::CCF() {
     setSubtract(0);
     setHalfCarry(0);
-    setCarry(static_cast<uint8_t>(~getCarry()));
+    setCarry(~getCarry());
 }
 
 void CPU::CPL() {
@@ -340,7 +332,7 @@ void CPU::DAA() {
 
     if (getSubtract() == 0 && a > 0x99 || getCarry() == 1) {
         offset |= 0x60;
-        setCarry(static_cast<uint8_t>(1));
+        setCarry(1);
     }
 
     (getSubtract() == 0) ? a += offset : a -= offset;
@@ -369,7 +361,7 @@ void CPU::NOP() {
 void CPU::SCF() {
     setSubtract(0);
     setHalfCarry(0);
-    setCarry(static_cast<uint8_t>(1));
+    setCarry(1);
 }
 
 void CPU::STOP() {
