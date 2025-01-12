@@ -88,6 +88,10 @@ void CPU::setCarry(uint8_t value) {
     f = Bitwise::modifyBitInByte(f, 4, value);
 }
 
+void CPU::setCarry(bool carryOccurred) {
+    f = Bitwise::modifyBitInByte(f, 4, carryOccurred ? 1 : 0);
+}
+
 void CPU::pushToStack16(uint16_t value) {
     sp--;
     memoryWrite(sp, (value >> 8) & 0xFF);
@@ -101,4 +105,109 @@ uint16_t CPU::popStack16() {
     auto hi = memoryRead(sp);
     sp++;
     return Bitwise::concatBytes(lo, hi);
+}
+
+/**
+8-bit Arithmetic and Logic Instructions
+ */
+
+void CPU::ADC(uint8_t value) {
+    auto originalValue = a;
+    a += value + getCarry();
+
+    // Set flags
+    setZero(a == 0);
+    setSubtract(0);
+    setHalfCarry(Bitwise::checkHalfCarryAdd(originalValue, (value + getCarry())));
+    setCarry(a < originalValue);
+}
+
+void CPU::ADD(uint8_t value) {
+    auto originalValue = a;
+    a += value;
+
+    // Set flags
+    setZero(a == 0);
+    setSubtract(0);
+    setHalfCarry(Bitwise::checkHalfCarryAdd(originalValue, value));
+    setCarry(a < originalValue);
+}
+
+void CPU::AND(uint8_t value) {
+    a &= value;
+
+    // Set flags
+    setZero(a == 0);
+    setSubtract(0);
+    setHalfCarry(1);
+    setCarry(static_cast<uint8_t>(0));
+}
+
+void CPU::CP(uint8_t value) {
+    auto originalValue = a;
+    uint8_t subResult = a - value;
+
+    // Set flags
+    setZero(subResult == 0);
+    setSubtract(1);
+    setHalfCarry(Bitwise::checkHalfCarrySub(originalValue, value));
+    setCarry(subResult > originalValue);
+}
+
+void CPU::OR(uint8_t value) {
+    a |= value;
+
+    // Set flags
+    setZero(a == 0);
+    setSubtract(0);
+    setHalfCarry(0);
+    setCarry(static_cast<uint8_t>(0));
+}
+
+void CPU::SBC(uint8_t value) {
+    auto originalValue = a;
+    a -= (value + getCarry());
+
+    // Set flags
+    setZero(a == 0);
+    setSubtract(1);
+    setHalfCarry(Bitwise::checkHalfCarrySub(originalValue, value + getCarry()));
+    setCarry(a > originalValue);
+
+}
+
+void CPU::SUB(uint8_t value) {
+    auto originalValue = a;
+    a -= value;
+
+    // Set flags
+    setZero(a == 0);
+    setSubtract(1);
+    setHalfCarry(Bitwise::checkHalfCarrySub(originalValue, value));
+    setCarry(a > originalValue);
+}
+
+void CPU::XOR(uint8_t value) {
+    a ^= value;
+
+    // Set flags
+    setZero(a == 0);
+    setSubtract(0);
+    setHalfCarry(0);
+    setCarry(static_cast<uint8_t>(0));
+}
+
+/**
+16-bit Arithmetic Instructions
+ */
+
+void CPU::ADD(uint16_t value) {
+    auto originalValue = getHL();
+    uint16_t result = originalValue + value;
+    setHL(result);
+
+    // Set flags
+    setSubtract(0);
+    setHalfCarry(Bitwise::checkHalfCarryAdd(originalValue, value));
+    setCarry(result < originalValue);
 }

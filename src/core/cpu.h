@@ -66,13 +66,14 @@ private:
     void setHalfCarry(uint8_t value);
     uint8_t getCarry();
     void setCarry(uint8_t value);
+    void setCarry(bool carryOccurred);
 
     // Stack helpers
     void pushToStack16(uint16_t value);
     uint16_t popStack16();
 
     /* ------------ */
-    /* Instructions */
+    /* INSTRUCTIONS */
     /* ------------ */
 
     /*
@@ -91,11 +92,101 @@ private:
     // Compares accumulator and value
     void CP(uint8_t value);
 
-    // Decrements value
-    void DEC(uint8_t value);
+    // Decrements 8-bit value
+    template <RegisterType regType>
+    void DEC8(uint8_t value) {
+        using enum RegisterType;
 
-    // Increments value
-    void INC(uint8_t value);
+        uint8_t originalValue {};
+
+        if constexpr (regType == A) {
+            originalValue = a;
+            a--;
+            setZero(a == 0);
+        } else if (regType == B) {
+            originalValue = b;
+            b--;
+            setZero(b == 0);
+        } else if (regType == C) {
+            originalValue = c;
+            c--;
+            setZero(c == 0);
+        } else if (regType == D) {
+            originalValue = d;
+            d--;
+            setZero(d == 0);
+        } else if (regType == E) {
+            originalValue = e;
+            e--;
+            setZero(e == 0);
+        } else if (regType == H) {
+            originalValue = h;
+            h--;
+            setZero(h == 0);
+        } else if (regType == L) {
+            originalValue = l;
+            l--;
+            setZero(l == 0);
+        } else if (regType == HL) {
+            originalValue = memoryRead(getHL());
+            memoryWrite(getHL(), originalValue-1);
+            setZero(originalValue-1 == 0);
+        } else {
+            Logger::err("{}", "Invalid register provided for DEC8 opcode. Must be A, B, C, D, E, H, L or HL");
+            return;
+        }
+
+        setSubtract(1);
+        setHalfCarry(Bitwise::checkHalfCarrySub(originalValue, 1));
+    }
+
+    // Increments 8-bit value
+    template <RegisterType regType>
+    void INC8(uint8_t value) {
+        using enum RegisterType;
+
+        uint8_t originalValue {};
+
+        if constexpr (regType == A) {
+            originalValue = a;
+            a++;
+            setZero(a == 0);
+        } else if (regType == B) {
+            originalValue = b;
+            b++;
+            setZero(b == 0);
+        } else if (regType == C) {
+            originalValue = c;
+            c++;
+            setZero(c == 0);
+        } else if (regType == D) {
+            originalValue = d;
+            d++;
+            setZero(d == 0);
+        } else if (regType == E) {
+            originalValue = e;
+            e++;
+            setZero(e == 0);
+        } else if (regType == H) {
+            originalValue = h;
+            h++;
+            setZero(h == 0);
+        } else if (regType == L) {
+            originalValue = l;
+            l++;
+            setZero(l == 0);
+        } else if (regType == HL) {
+            originalValue = memoryRead(getHL());
+            memoryWrite(getHL(), originalValue+1);
+            setZero(originalValue+1 == 0);
+        } else {
+            Logger::err("{}", "Invalid register provided for INC8 opcode. Must be A, B, C, D, E, H, L or HL");
+            return;
+        }
+
+        setSubtract(0);
+        setHalfCarry(Bitwise::checkHalfCarryAdd(originalValue, 1));
+    }
 
     // Bitwise OR of accumulator and value
     void OR(uint8_t value);
@@ -116,11 +207,45 @@ private:
     // Adds value to HL
     void ADD(uint16_t value);
 
-    // Decrements value in 16-bit register
-    void DEC();
+    // Decrements 16-bit value
+    template <RegisterType regType>
+    void DEC16() {
+        using enum RegisterType;
 
-    // Increments value in 16-bit register
-    void INC();
+        if constexpr (regType == AF) {
+            setAF(getAF()-1);
+        } else if (regType == BC) {
+            setBC(getBC()-1);
+        } else if (regType == DE) {
+            setDE(getDE()-1);
+        } else if (regType == HL) {
+            setHL(getHL()-1);
+        } else if (regType == SP) {
+            sp--;
+        } else {
+            Logger::err("{}", "Invalid register provided for DEC16 opcode. Must be AF, BC, DE, HL or SP");
+        }
+    }
+
+    // Increments 16-bit value
+    template <RegisterType regType>
+    void INC16() {
+        using enum RegisterType;
+
+        if constexpr (regType == AF) {
+            setAF(getAF()+1);
+        } else if (regType == BC) {
+            setBC(getBC()+1);
+        } else if (regType == DE) {
+            setDE(getDE()+1);
+        } else if (regType == HL) {
+            setHL(getHL()+1);
+        } else if (regType == SP) {
+            sp++;
+        } else {
+            Logger::err("{}", "Invalid register provided for INC16 opcode. Must be AF, BC, DE, HL or SP");
+        }
+    }
 
     /*
         Bit Operation Instructions
@@ -219,7 +344,7 @@ private:
 
         setSubtract(0);
         setHalfCarry(0);
-        setCarry(0);
+        setCarry(static_cast<uint8_t>(0));
     }
 
     /*
