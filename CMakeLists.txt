@@ -4,7 +4,7 @@ project(
     GBBuddy
     VERSION 0.1
     DESCRIPTION "A modern Game Boy emulator"
-    LANGUAGES CXX
+    LANGUAGES CXX C
 )
 
 set(CMAKE_CXX_STANDARD 23)
@@ -42,14 +42,18 @@ add_executable(gbbuddy
 
     src/core/cpu.cpp
     src/core/mmu.cpp
+
+    src/utils/dialog.cpp
+)
+
+add_library(tinyfiledialogs_lib STATIC ${tinyfiledialogs_SOURCE_DIR}/tinyfiledialogs.c)
+
+target_link_libraries(gbbuddy PRIVATE
+    fmt::fmt
+    SDL3::SDL3
+    tinyfiledialogs_lib
 )
 
 target_include_directories(gbbuddy PRIVATE
     ${tinyfiledialogs_SOURCE_DIR}
-)
-
-# Link libraries to executable
-target_link_libraries(gbbuddy PRIVATE
-    fmt::fmt
-    SDL3::SDL3
 )
