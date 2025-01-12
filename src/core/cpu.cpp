@@ -213,6 +213,66 @@ void CPU::ADD(uint16_t value) {
 }
 
 /**
+Load Instructions
+ */
+
+void CPU::LD_HL(uint8_t value) {
+    memoryWrite(getHL(), value);
+}
+
+void CPU::LD_n16_A(uint16_t address) {
+    memoryWrite(address, a);
+}
+
+void CPU::LD_A_n16(uint16_t address) {
+    a = memoryRead(address);
+}
+
+void CPU::LDH_n16_A(uint8_t lowByte) {
+    memoryWrite(0xFF00 & lowByte, a);
+}
+
+void CPU::LDH_C_A() {
+    memoryWrite(0xFF00 & c, a);
+}
+
+void CPU::LDH_A_n16(uint8_t lowByte) {
+    a = memoryRead(0xFF00 & lowByte);
+}
+
+void CPU::LDH_A_C() {
+    a = memoryRead(0xFF00 & c);
+}
+
+void CPU::LD_HLI_A() {
+    auto hl = getHL();
+
+    a = memoryRead(hl);
+    setHL(hl+1);
+}
+
+void CPU::LD_HLD_A() {
+    auto hl = getHL();
+
+    a = memoryRead(hl);
+    setHL(hl-1);
+}
+
+void CPU::LD_A_HLI() {
+    auto hl = getHL();
+
+    memoryWrite(hl, a);
+    setHL(hl+1);
+}
+
+void CPU::LD_A_HLD() {
+    auto hl = getHL();
+
+    memoryWrite(hl, a);
+    setHL(hl-1);
+}
+
+/**
 Jumps and Subroutines
  */
 
