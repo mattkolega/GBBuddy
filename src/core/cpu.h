@@ -786,7 +786,7 @@ private:
     void LD_SP_n16(uint16_t value);
 
     // Writes SP & $FF to address and SP >> 8 to address+1
-    void LD_n16_SP(uint16_t value);
+    void LD_n16_SP(uint16_t address);
 
     // Adds signed 8-bit value to SP and stores result in HL
     void LD_HL_SP(int8_t value);

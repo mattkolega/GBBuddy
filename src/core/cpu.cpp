@@ -306,6 +306,56 @@ void CPU::RST(uint8_t vec) {
 }
 
 /**
+Stack Operation Instructions
+ */
+
+void CPU::ADD_HL_SP() {
+    auto originalValue = getHL();
+    uint16_t result = originalValue + sp;
+    setHL(result);
+
+    // Set flags
+    setSubtract(0);
+    setHalfCarry(Bitwise::checkHalfCarryAdd(originalValue, sp));
+    setCarry(result < originalValue);
+}
+
+void CPU::ADD_SP_e8(int8_t value) {
+    auto originalValue = sp;
+    uint16_t result = sp + value;
+    sp = result;
+
+    // Set flags
+    setZero(0);
+    setSubtract(0);
+    setHalfCarry(Bitwise::checkHalfCarryAdd(originalValue, value));
+    setCarry(result < originalValue);
+}
+
+void CPU::LD_SP_n16(uint16_t value) {
+    sp = value;
+}
+
+void CPU::LD_n16_SP(uint16_t address) {
+    memoryWrite(address, sp & 0xFF);
+    memoryWrite(address + 1, (sp >> 8) & 0xFF);
+}
+
+void CPU::LD_HL_SP(int8_t value) {
+    uint16_t result = sp + value;
+    setHL(value);
+
+    setZero(0);
+    setSubtract(0);
+    setHalfCarry(Bitwise::checkHalfCarryAdd(sp, value));
+    setCarry(result < sp);
+}
+
+void CPU::LD_SP_HL() {
+    sp = getHL();
+}
+
+/**
 Miscellaneous Instructions
  */
 
