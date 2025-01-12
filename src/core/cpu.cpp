@@ -211,3 +211,66 @@ void CPU::ADD(uint16_t value) {
     setHalfCarry(Bitwise::checkHalfCarryAdd(originalValue, value));
     setCarry(result < originalValue);
 }
+
+/**
+Miscellaneous Instructions
+ */
+
+void CPU::CCF() {
+    setSubtract(0);
+    setHalfCarry(0);
+    setCarry(static_cast<uint8_t>(~getCarry()));
+}
+
+void CPU::CPL() {
+    a = ~a;
+
+    // Set flags
+    setSubtract(0);
+    setHalfCarry(0);
+}
+
+void CPU::DAA() {
+    uint8_t offset { 0 };
+
+    if (getSubtract() == 0 && (a & 0xF) > 0x9 || getHalfCarry() == 1) {
+        offset |= 0x06;
+    }
+
+    if (getSubtract() == 0 && a > 0x99 || getCarry() == 1) {
+        offset |= 0x60;
+        setCarry(static_cast<uint8_t>(1));
+    }
+
+    (getSubtract() == 0) ? a += offset : a -= offset;
+
+    // Set flags
+    setZero(a == 0);
+    setHalfCarry(0);
+}
+
+void CPU::DI() {
+    ime = 0;
+}
+
+void CPU::EI() {
+    // TODO: Add delayed setting of IME flag
+}
+
+void CPU::HALT() {
+    // TODO: Implement behaviour
+}
+
+void CPU::NOP() {
+    return;
+}
+
+void CPU::SCF() {
+    setSubtract(0);
+    setHalfCarry(0);
+    setCarry(static_cast<uint8_t>(1));
+}
+
+void CPU::STOP() {
+    // TODO: implement behaviour
+}
