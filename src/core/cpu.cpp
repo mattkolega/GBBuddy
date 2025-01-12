@@ -1,5 +1,7 @@
 #include "cpu.h"
 
+#include <bit>
+
 #include "gameboy.h"
 #include "../utils/bitwise.h"
 
@@ -212,6 +214,110 @@ void CPU::BIT(uint8_t bitPos, uint8_t value) {
     setZero((value & bitPos) == 0);
     setSubtract(0);
     setHalfCarry(1);
+}
+
+/**
+Bit Shift Instructions
+ */
+
+uint8_t CPU::RL(uint8_t value) {
+    auto carryValue = getCarry();  // Get current carry flag value
+    setCarry(Bitwise::getBitInByte(value, 7));  // Set carry flag to leftmost bit
+    uint8_t newValue = std::rotl(value, 1);
+    return newValue & carryValue;
+}
+
+void CPU::RL_HL() {
+    auto newValue = RL(memoryRead(getHL()));
+    memoryWrite(getHL(), newValue);
+
+    // Set flags
+    setZero(newValue == 0);
+    setSubtract(0);
+    setHalfCarry(0);
+}
+
+void CPU::RLA() {
+    a = RL(a);
+
+    // Set flags
+    setZero(0);
+    setSubtract(0);
+    setHalfCarry(0);
+}
+
+uint8_t CPU::RLC(uint8_t value) {
+    setCarry(Bitwise::getBitInByte(value, 7));  // Set carry flag to leftmost bit
+    return std::rotl(value, 1);
+}
+
+void CPU::RLC_HL() {
+    auto newValue = RLC(memoryRead(getHL()));
+    memoryWrite(getHL(), newValue);
+
+    // Set flags
+    setZero(newValue == 0);
+    setSubtract(0);
+    setHalfCarry(0);
+}
+
+void CPU::RLCA() {
+    a = RLC(a);
+
+    // Set flags
+    setZero(0);
+    setSubtract(0);
+    setHalfCarry(0);
+}
+
+uint8_t CPU::RR(uint8_t value) {
+    auto carryValue = getCarry();  // Get current carry flag value
+    setCarry(Bitwise::getBitInByte(value, 0));  // Set carry flag to right-most bit
+    uint8_t newValue = std::rotr(value, 1);
+    return newValue & (carryValue << 7);
+}
+
+void CPU::RR_HL() {
+    auto newValue = RR(memoryRead(getHL()));
+    memoryWrite(getHL(), newValue);
+
+    // Set flags
+    setZero(newValue == 0);
+    setSubtract(0);
+    setHalfCarry(0);
+}
+
+void CPU::RRA() {
+    a = RR(a);
+
+    // Set flags
+    setZero(0);
+    setSubtract(0);
+    setHalfCarry(0);
+}
+
+uint8_t CPU::RRC(uint8_t value) {
+    setCarry(Bitwise::getBitInByte(value, 0));  // Set carry flag to right-most bit
+    return std::rotr(value, 1);
+}
+
+void CPU::RRC_HL() {
+    auto newValue = RRC(memoryRead(getHL()));
+    memoryWrite(getHL(), newValue);
+
+    // Set flags
+    setZero(newValue == 0);
+    setSubtract(0);
+    setHalfCarry(0);
+}
+
+void CPU::RRCA() {
+    a = RRC(a);
+
+    // Set flags
+    setZero(0);
+    setSubtract(0);
+    setHalfCarry(0);
 }
 
 /**
