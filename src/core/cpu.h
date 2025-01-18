@@ -24,6 +24,13 @@ enum class RegisterType {
 };
 
 class CPU {
+public:
+    CPU() = delete;
+    CPU(GameBoy *gb);
+
+    // Executes a single opcode. Returns number of cycles
+    size_t step();
+
 private:
     // Registers
     uint8_t a;
@@ -70,6 +77,12 @@ private:
     void pushToStack16(uint16_t value);
     uint16_t popStack16();
 
+    // Decodes a short 8-bit opcode. Returns number of cycles
+    size_t opDecode();
+
+    // Decodes a long 16-bit (prefixed with $CB) opcode. Returns number of cycles
+    size_t opDecodeCB();
+
     /* ------------ */
     /* INSTRUCTIONS */
     /* ------------ */
@@ -92,7 +105,7 @@ private:
 
     // Decrements 8-bit value
     template <RegisterType regType>
-    void DEC8(uint8_t value) {
+    void DEC8() {
         using enum RegisterType;
 
         uint8_t originalValue {};
@@ -140,7 +153,7 @@ private:
 
     // Increments 8-bit value
     template <RegisterType regType>
-    void INC8(uint8_t value) {
+    void INC8() {
         using enum RegisterType;
 
         uint8_t originalValue {};
@@ -860,8 +873,4 @@ private:
 
     // Stops GB execution
     void STOP();
-
-public:
-    CPU() = delete;
-    CPU(GameBoy *gb);
 };
