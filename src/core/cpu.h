@@ -31,6 +31,12 @@ public:
     // Executes a single opcode. Returns number of cycles
     size_t step();
 
+    // Sets CPU state to what it is immediately after executing boot ROM
+    void setToBootState();
+
+    // Prints CPU state to console
+    void printState();
+
 private:
     // Registers
     uint8_t a;

@@ -1,6 +1,7 @@
 #include "cpu.h"
 
 #include <bit>
+#include <iostream>
 
 #include "gameboy.h"
 #include "../utils/bitwise.h"
@@ -8,6 +9,38 @@
 CPU::CPU(GameBoy *gb)
     : gb(gb)
 {
+}
+
+size_t CPU::step() {
+    return opDecode();
+}
+
+void CPU::setToBootState() {
+    a = 0x01;
+    f = 0xB0;
+    b = 0x00;
+    c = 0x13;
+    d = 0x00;
+    e = 0xD8;
+    h = 0x01;
+    l = 0x4D;
+    sp = 0xFFFE;
+    pc = 0x0100;
+}
+
+void CPU::printState() {
+    std::cout << std::hex
+        << "A:" << a
+        << " F:" << f
+        << " B:" << b
+        << " C:" << c
+        << " D:" << d
+        << " E:" << e
+        << " H:" << h
+        << " L:" << l
+        << " SP: " << sp
+        << " PC: " << pc
+        << " PCMEM:" << memoryRead(pc) << ',' << memoryRead(pc+1) << ',' << memoryRead(pc+2) << ',' << memoryRead(pc+3) << '\n';
 }
 
 uint8_t CPU::memoryRead(uint16_t address) {
