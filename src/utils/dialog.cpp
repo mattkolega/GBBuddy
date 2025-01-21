@@ -3,13 +3,13 @@
 #include <tinyfiledialogs.h>
 
 namespace Dialog {
-    std::string openFile(std::string_view dialogTitle, std::vector<const char *> filters, std::string_view filterDescription) {
+    std::string openFile(const char *dialogTitle, std::vector<const char *> filters, const char *filterDescription) {
         auto filename = tinyfd_openFileDialog(
-            std::string(dialogTitle).c_str(),
+            dialogTitle,
             nullptr,
             filters.size(),
             filters.data(),
-            std::string(filterDescription).c_str(),
+            filterDescription,
             0
         );
         return std::string(filename);
