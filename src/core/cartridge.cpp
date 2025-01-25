@@ -4,6 +4,8 @@
 #include <fstream>
 #include <iterator>
 
+#include "mappers/nombc.h"
+
 #include "../utils/bitwise.h"
 #include "../utils/dialog.h"
 #include "../utils/logger.h"
@@ -14,8 +16,18 @@ Cartridge::Cartridge(GameBoy *gb)
     auto result = loadGBFile();
     if (!result) throw std::runtime_error(result.error());
 
-    m_rom = result.value();
+    m_rom = std::move(result.value());
     verifyCartHeader();
+
+    setMapper();
+}
+
+uint8_t Cartridge::romRead(uint16_t address) {
+    return mapper->romRead(address);
+}
+
+void Cartridge::romWrite(uint16_t address, uint8_t value) {
+    return mapper->romWrite(address, value);
 }
 
 std::expected<std::vector<uint8_t>, std::string> Cartridge::loadGBFile() {
@@ -79,4 +91,14 @@ void Cartridge::verifyCartHeader() {
     cartHeader.globalChecksum = Bitwise::concatBytes(m_rom[0x014F], m_rom[0x014E]);
 
     m_cartHeader = cartHeader;
+}
+
+void Cartridge::setMapper() {
+    switch (m_cartHeader.cartType) {
+        case 0x01:
+            mapper = std::make_unique<NoMBC>(*this);
+            break;
+        default:
+            throw std::runtime_error("Specified cartridge type not supported");
+    }
 }
