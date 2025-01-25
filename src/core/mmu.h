@@ -6,9 +6,9 @@ class GameBoy;
 
 class MMU {
 private:
-    std::array<uint8_t, 1024 * 64> rom {};  // Temporary 64KB will gradually be reduced to actual RAM size as proper memory mapping is introduced
+    std::array<uint8_t, 1024 * 64> m_memory {};  // Temporary 64KB will gradually be reduced to actual RAM size as proper memory mapping is introduced
 
-    GameBoy *gb { nullptr };
+    GameBoy *m_gb { nullptr };
 
 public:
     MMU() = delete;
