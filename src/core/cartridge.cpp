@@ -2,7 +2,6 @@
 
 #include <stdexcept>
 #include <fstream>
-#include <iterator>
 
 #include "mappers/nombc.h"
 
@@ -13,12 +12,8 @@
 Cartridge::Cartridge(GameBoy *gb)
     : m_gb(gb)
 {
-    auto result = loadGBFile();
-    if (!result) throw std::runtime_error(result.error());
-
-    m_rom = std::move(result.value());
+    loadGBFile();
     verifyCartHeader();
-
     setMapper();
 }
 
@@ -30,24 +25,28 @@ void Cartridge::romWrite(uint16_t address, uint8_t value) {
     return mapper->romWrite(address, value);
 }
 
-std::expected<std::vector<uint8_t>, std::string> Cartridge::loadGBFile() {
+void Cartridge::loadGBFile() {
     auto filepath = Dialog::openFile("Open GB ROM File", {"*.gb"}, "Game Boy ROMs");
-    if (filepath.empty()) return std::unexpected("Filepath is empty");
+    if (filepath.empty()) throw std::runtime_error("ROM size is too small to properly pass header");
 
-    std::ifstream romFile(filepath, std::ios::binary | std::ios::in);
-    if (!romFile) return std::unexpected("Failed to open ROM file: " + filepath);
+    std::ifstream romFile(filepath, std::ios::binary);
+    if (!romFile) throw std::runtime_error("Failed to open ROM file: " + filepath);
 
     Logger::info("{} {}", "Loaded ROM: ", filepath);
 
-    return std::vector<uint8_t> {
-        std::istream_iterator<uint8_t>(romFile),
-        std::istream_iterator<uint8_t>(),
-    };
+    romFile.seekg(0, std::ios::end);
+    auto fileSize = romFile.tellg();
+    romFile.seekg(0, std::ios::beg);
+
+    m_rom.resize(fileSize);
+    if (!romFile.read(reinterpret_cast<char*>(m_rom.data()), fileSize)) {
+        throw std::runtime_error("Failed to read the ROM file.");
+    }
 }
 
 void Cartridge::verifyCartHeader() {
     // If ROM size is less than required size for cart header, throw error
-    if (m_rom.size() < 325) throw std::runtime_error("ROM size is too small to properly pass header");
+    if (m_rom.size() < 325) throw std::runtime_error("ROM size is too small to properly parse header");
 
     CartHeader cartHeader;
 
@@ -81,14 +80,14 @@ void Cartridge::verifyCartHeader() {
             break;
         default:
             cartHeader.ramBanks = 0;
-            Logger::warn("{}", "Unknown value given for number of RAM banks");
+            Logger::warn("{} 0x{:X}", "Unknown value given for number of RAM banks:", m_rom[0x0149]);
             break;
     }
 
     m_ram.resize((1024 * 8) * cartHeader.ramBanks);
 
     cartHeader.headerChecksum = m_rom[0x014D];
-    cartHeader.globalChecksum = Bitwise::concatBytes(m_rom[0x014F], m_rom[0x014E]);
+    cartHeader.globalChecksum = Bitwise::concatBytes(m_rom[0x014E], m_rom[0x014F]);
 
     m_cartHeader = cartHeader;
 }

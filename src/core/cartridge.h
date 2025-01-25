@@ -42,7 +42,7 @@ private:
     friend NoMBC;
 
     // Opens and loads .gb file
-    std::expected<std::vector<uint8_t>, std::string> loadGBFile();
+    void loadGBFile();
 
     // Grabs all useful cartridge header info. Based on https://gbdev.io/pandocs/The_Cartridge_Header.html
     void verifyCartHeader();
