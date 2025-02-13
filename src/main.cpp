@@ -1,7 +1,11 @@
-#include <iostream>
+#include "core/gameboy.h"
 
 int main() {
-    std::cout << "Hello, World!" << std::endl;
+    GameBoy gb;
+
+    while (true) {
+        gb.run();
+    }
 
     return 0;
 }
