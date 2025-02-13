@@ -1,7 +1,8 @@
 #include "cpu.h"
 
 #include <bit>
-#include <iostream>
+
+#include <fmt/base.h>
 
 #include "gameboy.h"
 #include "../utils/bitwise.h"
@@ -29,18 +30,10 @@ void CPU::setToBootState() {
 }
 
 void CPU::printState() {
-    std::cout << std::hex
-        << "A:" << a
-        << " F:" << f
-        << " B:" << b
-        << " C:" << c
-        << " D:" << d
-        << " E:" << e
-        << " H:" << h
-        << " L:" << l
-        << " SP: " << sp
-        << " PC: " << pc
-        << " PCMEM:" << memoryRead(pc) << ',' << memoryRead(pc+1) << ',' << memoryRead(pc+2) << ',' << memoryRead(pc+3) << '\n';
+    fmt::println(
+        "A:{:02X} F:{:02X} B:{:02X} C:{:02X} D:{:02X} E:{:02X} H:{:02X} L:{:02X} SP:{:04X} PC:{:04X} PCMEM:{:02X},{:02X},{:02X},{:02X}",
+        a, f, b, c, d ,e ,h, l, sp, pc, memoryRead(pc), memoryRead(pc+1), memoryRead(pc+2), memoryRead(pc+3)
+    );
 }
 
 uint8_t CPU::memoryRead(uint16_t address) {
@@ -257,7 +250,7 @@ uint8_t CPU::RL(uint8_t value) {
     auto carryValue = getCarry();  // Get current carry flag value
     setCarry(Bitwise::getBitInByte(value, 7));  // Set carry flag to leftmost bit
     uint8_t newValue = std::rotl(value, 1);
-    return newValue & carryValue;
+    return Bitwise::modifyBitInByte(newValue, 0, carryValue);
 }
 
 void CPU::RL_HL() {
@@ -307,7 +300,7 @@ uint8_t CPU::RR(uint8_t value) {
     auto carryValue = getCarry();  // Get current carry flag value
     setCarry(Bitwise::getBitInByte(value, 0));  // Set carry flag to right-most bit
     uint8_t newValue = std::rotr(value, 1);
-    return newValue & (carryValue << 7);
+    return Bitwise::modifyBitInByte(newValue, 7, carryValue);
 }
 
 void CPU::RR_HL() {
@@ -370,46 +363,46 @@ void CPU::LD_A_n16(uint16_t address) {
 }
 
 void CPU::LDH_n16_A(uint8_t lowByte) {
-    memoryWrite(0xFF00 & lowByte, a);
+    memoryWrite(0xFF00 | lowByte, a);
 }
 
 void CPU::LDH_C_A() {
-    memoryWrite(0xFF00 & c, a);
+    memoryWrite(0xFF00 | c, a);
 }
 
 void CPU::LDH_A_n16(uint8_t lowByte) {
-    a = memoryRead(0xFF00 & lowByte);
+    a = memoryRead(0xFF00 | lowByte);
 }
 
 void CPU::LDH_A_C() {
-    a = memoryRead(0xFF00 & c);
+    a = memoryRead(0xFF00 | c);
 }
 
 void CPU::LD_HLI_A() {
     auto hl = getHL();
 
-    a = memoryRead(hl);
+    memoryWrite(hl, a);
     setHL(hl+1);
 }
 
 void CPU::LD_HLD_A() {
     auto hl = getHL();
 
-    a = memoryRead(hl);
+    memoryWrite(hl, a);
     setHL(hl-1);
 }
 
 void CPU::LD_A_HLI() {
     auto hl = getHL();
 
-    memoryWrite(hl, a);
+    a = memoryRead(hl);
     setHL(hl+1);
 }
 
 void CPU::LD_A_HLD() {
     auto hl = getHL();
 
-    memoryWrite(hl, a);
+    a = memoryRead(hl);
     setHL(hl-1);
 }
 
@@ -691,7 +684,7 @@ size_t CPU::opDecode() {
                     return 2;
                 }
                 case 0xA: {
-                    LD_r8<RegisterType::A>(getDE());
+                    LD_A_n16(getDE());
                     return 2;
                 }
                 case 0xB: {
@@ -832,11 +825,11 @@ size_t CPU::opDecode() {
                     return 2;
                 }
                 case 0x4: {
-                    INC16<RegisterType::HL>();
+                    INC8<RegisterType::HL>();
                     return 3;
                 }
                 case 0x5: {
-                    DEC16<RegisterType::HL>();
+                    DEC8<RegisterType::HL>();
                     return 3;
                 }
                 case 0x6: {
@@ -879,7 +872,8 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 case 0xE: {
-                    LD_A_n16(a);
+                    LD_r8<RegisterType::A>(memoryRead(pc));
+                    pc++;
                     return 2;
                 }
                 case 0xF: {
@@ -1406,7 +1400,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 case 0x6: {
-                    OR(memoryRead(pc));
+                    OR(memoryRead(getHL()));
                     return 2;
                 }
                 case 0x7: {
@@ -1765,6 +1759,7 @@ size_t CPU::opDecode() {
                 }
                 case 0xE: {
                     CP(memoryRead(pc));
+                    pc++;
                     return 2;
                 }
                 case 0xF: {

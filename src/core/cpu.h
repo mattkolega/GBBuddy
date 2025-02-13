@@ -598,36 +598,36 @@ private:
         using enum RegisterType;
 
         if constexpr (regType == A) {
-            setCarry(Bitwise::getBitInByte(a, 7));
+            setCarry(Bitwise::getBitInByte(a, 0));
             a = (a >> 1) | (getCarry() << 7);
             setZero(a == 0);
         } else if (regType == B) {
-            setCarry(Bitwise::getBitInByte(b, 7));
+            setCarry(Bitwise::getBitInByte(b, 0));
             b = (b >> 1) | (getCarry() << 7);
             setZero(b == 0);
         } else if (regType == C) {
-            setCarry(Bitwise::getBitInByte(c, 7));
+            setCarry(Bitwise::getBitInByte(c, 0));
             c = (c >> 1) | (getCarry() << 7);
             setZero(c == 0);
         } else if (regType == D) {
-            setCarry(Bitwise::getBitInByte(d, 7));
+            setCarry(Bitwise::getBitInByte(d, 0));
             d = (d >> 1) | (getCarry() << 7);
             setZero(d == 0);
         } else if (regType == E) {
-            setCarry(Bitwise::getBitInByte(e, 7));
+            setCarry(Bitwise::getBitInByte(e, 0));
             e = (e >> 1) | (getCarry() << 7);
             setZero(e == 0);
         } else if (regType == H) {
-            setCarry(Bitwise::getBitInByte(h, 7));
+            setCarry(Bitwise::getBitInByte(h, 0));
             h = (h >> 1) | (getCarry() << 7);
             setZero(h == 0);
         } else if (regType == L) {
-            setCarry(Bitwise::getBitInByte(l, 7));
+            setCarry(Bitwise::getBitInByte(l, 0));
             l = (l >> 1) | (getCarry() << 7);
             setZero(l == 0);
         } else if (regType == HL) {
             auto newVal = getHL();
-            setCarry(Bitwise::getBitInByte(newVal, 7));
+            setCarry(Bitwise::getBitInByte(newVal, 0));
             newVal = (newVal >> 1) | (getCarry() << 7);
             memoryWrite(getHL(), newVal);
             setZero(newVal == 0);
@@ -646,36 +646,36 @@ private:
         using enum RegisterType;
 
         if constexpr (regType == A) {
-            setCarry(Bitwise::getBitInByte(a, 7));
+            setCarry(Bitwise::getBitInByte(a, 0));
             a >>= 1;
             setZero(a == 0);
         } else if (regType == B) {
-            setCarry(Bitwise::getBitInByte(b, 7));
+            setCarry(Bitwise::getBitInByte(b, 0));
             b >>= 1;
             setZero(b == 0);
         } else if (regType == C) {
-            setCarry(Bitwise::getBitInByte(c, 7));
+            setCarry(Bitwise::getBitInByte(c, 0));
             c >>= 1;
             setZero(c == 0);
         } else if (regType == D) {
-            setCarry(Bitwise::getBitInByte(d, 7));
+            setCarry(Bitwise::getBitInByte(d, 0));
             d >>= 1;
             setZero(d == 0);
         } else if (regType == E) {
-            setCarry(Bitwise::getBitInByte(e, 7));
+            setCarry(Bitwise::getBitInByte(e, 0));
             e >>= 1;
             setZero(e == 0);
         } else if (regType == H) {
-            setCarry(Bitwise::getBitInByte(h, 7));
+            setCarry(Bitwise::getBitInByte(h, 0));
             h >>= 1;
             setZero(h == 0);
         } else if (regType == L) {
-            setCarry(Bitwise::getBitInByte(l, 7));
+            setCarry(Bitwise::getBitInByte(l, 0));
             l >>= 1;
             setZero(l == 0);
         } else if (regType == HL) {
             auto newVal = getHL();
-            setCarry(Bitwise::getBitInByte(newVal, 7));
+            setCarry(Bitwise::getBitInByte(newVal, 0));
             newVal >>= 1;
             memoryWrite(getHL(), newVal);
             setZero(newVal == 0);
@@ -750,7 +750,7 @@ private:
     // Gets value from accumulator and writes to memory with address $FF00 + offset
     void LDH_C_A();
 
-    // Gets value from memory and stores in accumulator
+    // Gets value from memory and stores in accumulator.
     // Memory address must be between $FF00 and $FFFF
     void LDH_A_n16(uint8_t lowByte);
 
