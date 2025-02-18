@@ -51,7 +51,7 @@ add_executable(gbbuddy
     src/core/mappers/mapper.cpp
     src/core/mappers/nombc.cpp
 
-    src/utils/dialog.cpp
+    src/common/dialog.cpp
 )
 
 add_library(tinyfiledialogs_lib STATIC ${tinyfiledialogs_SOURCE_DIR}/tinyfiledialogs.c)

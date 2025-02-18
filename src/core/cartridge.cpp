@@ -5,9 +5,9 @@
 
 #include "mappers/nombc.h"
 
-#include "../utils/bitwise.h"
-#include "../utils/dialog.h"
-#include "../utils/logger.h"
+#include "../common/bitwise.h"
+#include "../common/dialog.h"
+#include "../common/logger.h"
 
 Cartridge::Cartridge(GameBoy *gb)
     : m_gb(gb)
