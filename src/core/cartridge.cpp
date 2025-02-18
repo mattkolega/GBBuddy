@@ -3,11 +3,11 @@
 #include <stdexcept>
 #include <fstream>
 
-#include "mappers/nombc.h"
+#include <common/bitwise.h>
+#include <common/dialog.h>
+#include <common/logger.h>
 
-#include "../common/bitwise.h"
-#include "../common/dialog.h"
-#include "../common/logger.h"
+#include "mappers/nombc.h"
 
 Cartridge::Cartridge(GameBoy *gb)
     : m_gb(gb)

@@ -1,8 +1,9 @@
 #include "mmu.h"
 
+#include <common/logger.h>
+
 #include "cartridge.h"
 #include "gameboy.h"
-#include "../common/logger.h"
 
 MMU::MMU(GameBoy *gb)
     : m_gb(gb)

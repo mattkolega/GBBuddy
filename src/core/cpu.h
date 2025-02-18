@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-#include "../common/bitwise.h"
-#include "../common/logger.h"
+#include <common/bitwise.h>
+#include <common/logger.h>
 
 class GameBoy;
 

@@ -35,11 +35,16 @@ FetchContent_Declare(
 FetchContent_Declare(
     tinyfiledialogs
     GIT_REPOSITORY https://git.code.sf.net/p/tinyfiledialogs/code
-    GIT_TAG 29c1b354d75825209adf8cc1979c425885a64d32
+    GIT_TAG master
     GIT_SHALLOW 1
 )
 
 FetchContent_MakeAvailable(fmt SDL3 tinyfiledialogs)
+
+# tinyfiledialogs needs to be compiled before it can be used
+add_library(tinyfiledialogs_lib STATIC ${tinyfiledialogs_SOURCE_DIR}/tinyfiledialogs.c)
+
+add_subdirectory(src/common)
 
 add_executable(gbbuddy
     src/main.cpp
@@ -50,18 +55,11 @@ add_executable(gbbuddy
     src/core/mmu.cpp
     src/core/mappers/mapper.cpp
     src/core/mappers/nombc.cpp
-
-    src/common/dialog.cpp
 )
 
-add_library(tinyfiledialogs_lib STATIC ${tinyfiledialogs_SOURCE_DIR}/tinyfiledialogs.c)
-
-target_link_libraries(gbbuddy PRIVATE
-    fmt::fmt
-    SDL3::SDL3
-    tinyfiledialogs_lib
-)
-
-target_include_directories(gbbuddy PRIVATE
-    ${tinyfiledialogs_SOURCE_DIR}
+target_link_libraries(gbbuddy
+    PRIVATE
+        common
+        fmt::fmt
+        SDL3::SDL3
 )

@@ -4,8 +4,9 @@
 
 #include <fmt/base.h>
 
+#include <common/bitwise.h>
+
 #include "gameboy.h"
-#include "../common/bitwise.h"
 
 CPU::CPU(GameBoy *gb)
     : gb(gb)
