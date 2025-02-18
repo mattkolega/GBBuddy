@@ -45,21 +45,15 @@ FetchContent_MakeAvailable(fmt SDL3 tinyfiledialogs)
 add_library(tinyfiledialogs_lib STATIC ${tinyfiledialogs_SOURCE_DIR}/tinyfiledialogs.c)
 
 add_subdirectory(src/common)
+add_subdirectory(src/core)
 
 add_executable(gbbuddy
     src/main.cpp
-
-    src/core/cartridge.cpp
-    src/core/cpu.cpp
-    src/core/gameboy.cpp
-    src/core/mmu.cpp
-    src/core/mappers/mapper.cpp
-    src/core/mappers/nombc.cpp
 )
 
 target_link_libraries(gbbuddy
     PRIVATE
         common
-        fmt::fmt
+        core
         SDL3::SDL3
 )

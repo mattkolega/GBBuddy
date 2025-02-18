@@ -1,4 +1,4 @@
-#include "core/gameboy.h"
+#include <core/gameboy.h>
 
 int main() {
     GameBoy gb;

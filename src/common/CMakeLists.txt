@@ -3,8 +3,9 @@ add_library(common STATIC
 )
 
 target_link_libraries(common
+    PUBLIC
+        fmt::fmt  # Public because it's included in logger.h which is used by other targets
     PRIVATE
-        fmt::fmt
         tinyfiledialogs_lib
 )
 
