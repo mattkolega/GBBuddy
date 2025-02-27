@@ -17,7 +17,7 @@ uint8_t MMU::memoryRead(uint16_t address) {
         return m_memory[address];
     } else if (address >= 0xE000 && address <= 0xFDFF) {
         return m_memory[address - 0x2000];
-    } else if (address >= 0xFF00 && address <= 0xFF43) {
+    } else if (address >= 0xFE00 && address <= 0xFF43) {
         return m_memory[address];
     } else if (address == 0xFF44) {
         return 0x90;
@@ -35,8 +35,8 @@ void MMU::memoryWrite(uint16_t address, uint8_t value) {
     } else if (address >= 0x8000 && address <= 0xDFFF) {
         m_memory[address] = value;
     } else if (address >= 0xE000 && address <= 0xFDFF) {
-        m_memory[address - 0x2000];
-    } else if (address >= 0xFF00 && address <= 0xFFFF) {
+        m_memory[address - 0x2000] = value;
+    } else if (address >= 0xFE00 && address <= 0xFFFF) {
         m_memory[address] = value;
     } else {
         Logger::err("{} {:X}", "Invalid address for memory write: ", address);
