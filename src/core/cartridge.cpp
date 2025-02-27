@@ -12,9 +12,19 @@
 Cartridge::Cartridge(GameBoy *gb)
     : m_gb(gb)
 {
+}
+
+void Cartridge::init() {
     loadGBFile();
     verifyCartHeader();
     setMapper();
+}
+
+void Cartridge::initForTests() {
+    m_rom.resize(32 * 1024);
+    m_ram.resize(8 * 1024);
+
+    mapper = std::make_unique<NoMBC>(*this);
 }
 
 uint8_t Cartridge::romRead(uint16_t address) {

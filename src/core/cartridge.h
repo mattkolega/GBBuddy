@@ -26,6 +26,12 @@ public:
     Cartridge() = delete;
     Cartridge(GameBoy *gb);
 
+    // Loads ROM file and sets up mapper
+    void init();
+
+    // Sets up cartridge for use in testing
+    void initForTests();
+
     uint8_t romRead(uint16_t address);
     void romWrite(uint16_t address, uint8_t value);
 

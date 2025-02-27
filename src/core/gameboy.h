@@ -12,5 +12,11 @@ public:
 
     GameBoy();
 
+    // Sets up emulator and components
+    void init();
+
+    // Sets up emulator for use in testing
+    void initForTests();
+
     void run();
 };
