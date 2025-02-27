@@ -46,6 +46,7 @@ add_library(tinyfiledialogs_lib STATIC ${tinyfiledialogs_SOURCE_DIR}/tinyfiledia
 
 add_subdirectory(src/common)
 add_subdirectory(src/core)
+add_subdirectory(test)
 
 add_executable(gbbuddy
     src/main.cpp
