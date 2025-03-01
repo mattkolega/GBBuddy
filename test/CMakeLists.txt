@@ -1,8 +1,9 @@
+# Needed for creating test cases
 FetchContent_Declare(
   Catch2
   GIT_REPOSITORY https://github.com/catchorg/Catch2.git
   GIT_TAG        v3.4.0
-  GIT_SHALLOW 1
+  GIT_SHALLOW TRUE
 )
 FetchContent_MakeAvailable(Catch2)
 
@@ -10,6 +11,7 @@ FetchContent_MakeAvailable(Catch2)
 list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 
 add_executable(gbbuddytest
+    bitwisetest.cpp
     mmutest.cpp
 )
 
