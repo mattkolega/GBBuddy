@@ -17,10 +17,8 @@ uint8_t MMU::memoryRead(uint16_t address) {
         return m_memory[address];
     } else if (address >= 0xE000 && address <= 0xFDFF) {
         return m_memory[address - 0x2000];
-    } else if (address >= 0xFE00 && address <= 0xFF43) {
+    } else if (address >= 0xFE00 && address <= 0xFF44) {
         return m_memory[address];
-    } else if (address == 0xFF44) {
-        return 0x90;
     } else if (address >= 0xFF45 && address <= 0xFFFF) {
         return m_memory[address];
     } else {
