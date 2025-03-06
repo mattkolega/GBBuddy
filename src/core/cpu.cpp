@@ -1,12 +1,43 @@
 #include "cpu.h"
 
 #include <bit>
+#include <sstream>
 
 #include <fmt/base.h>
 
 #include <common/bitwise.h>
 
 #include "gameboy.h"
+
+std::string CPUState::toString() {
+    std::ostringstream stream {};
+    stream << "A: " << +a
+           << " F: " << +f
+           << " B: " << +b
+           << " C: " << +c
+           << " D: " << +d
+           << " E: " << +e
+           << " H: " << +h
+           << " L: " << +l
+           << " SP: " << +sp
+           << " PC: " << +pc;
+    return stream.str();
+}
+
+bool operator==(CPUState &state1, CPUState &state2) {
+    if (state1.a != state2.a) return false;
+    if (state1.b != state2.b) return false;
+    if (state1.c != state2.c) return false;
+    if (state1.d != state2.d) return false;
+    if (state1.e != state2.e) return false;
+    if (state1.f != state2.f) return false;
+    if (state1.h != state2.h) return false;
+    if (state1.l != state2.l) return false;
+    if (state1.sp != state2.sp) return false;
+    if (state1.pc != state2.pc) return false;
+
+    return true;
+}
 
 CPU::CPU(GameBoy *gb)
     : gb(gb)
@@ -17,17 +48,32 @@ size_t CPU::step() {
     return opDecode();
 }
 
-void CPU::setToBootState() {
-    a = 0x01;
-    f = 0xB0;
-    b = 0x00;
-    c = 0x13;
-    d = 0x00;
-    e = 0xD8;
-    h = 0x01;
-    l = 0x4D;
-    sp = 0xFFFE;
-    pc = 0x0100;
+void CPU::setState(CPUState state) {
+    a = state.a;
+    f = state.f;
+    b = state.b;
+    c = state.c;
+    d = state.d;
+    e = state.e;
+    h = state.h;
+    l = state.l;
+    sp = state.sp;
+    pc = state.pc;
+}
+
+CPUState CPU::getState() {
+    return CPUState{
+        .a = a,
+        .b = b,
+        .c = c,
+        .d = d,
+        .e = e,
+        .f = f,
+        .h = h,
+        .l = l,
+        .sp = sp,
+        .pc = pc
+    };
 }
 
 void CPU::printState() {
@@ -139,8 +185,9 @@ void CPU::ADC(uint8_t value) {
     // Set flags
     setZero(a == 0);
     setSubtract(0);
-    setHalfCarry(Bitwise::checkHalfCarryAdd(originalValue, (value + getCarry())));
-    setCarry(a < originalValue);
+    setHalfCarry(Bitwise::checkHalfCarryAdd(value, getCarry()));
+    setHalfCarry(getHalfCarry() | Bitwise::checkHalfCarryAdd(originalValue, (value + getCarry())));
+    setCarry((originalValue + value + getCarry()) > 0xFF);
 }
 
 void CPU::ADD(uint8_t value) {
@@ -151,7 +198,7 @@ void CPU::ADD(uint8_t value) {
     setZero(a == 0);
     setSubtract(0);
     setHalfCarry(Bitwise::checkHalfCarryAdd(originalValue, value));
-    setCarry(a < originalValue);
+    setCarry((originalValue + value) > 0xFF);
 }
 
 void CPU::AND(uint8_t value) {
@@ -165,14 +212,13 @@ void CPU::AND(uint8_t value) {
 }
 
 void CPU::CP(uint8_t value) {
-    auto originalValue = a;
     uint8_t subResult = a - value;
 
     // Set flags
     setZero(subResult == 0);
     setSubtract(1);
-    setHalfCarry(Bitwise::checkHalfCarrySub(originalValue, value));
-    setCarry(subResult > originalValue);
+    setHalfCarry(Bitwise::checkHalfCarrySub(a, value));
+    setCarry((a - value) < 0);
 }
 
 void CPU::OR(uint8_t value) {
@@ -193,7 +239,7 @@ void CPU::SBC(uint8_t value) {
     setZero(a == 0);
     setSubtract(1);
     setHalfCarry(Bitwise::checkHalfCarrySub(originalValue, value + getCarry()));
-    setCarry(a > originalValue);
+    setCarry((originalValue - value - getCarry()) < 0);
 
 }
 
@@ -205,7 +251,7 @@ void CPU::SUB(uint8_t value) {
     setZero(a == 0);
     setSubtract(1);
     setHalfCarry(Bitwise::checkHalfCarrySub(originalValue, value));
-    setCarry(a > originalValue);
+    setCarry((originalValue - value) < 0);
 }
 
 void CPU::XOR(uint8_t value) {
@@ -230,7 +276,7 @@ void CPU::ADD(uint16_t value) {
     // Set flags
     setSubtract(0);
     setHalfCarry(Bitwise::checkHalfCarryAdd(originalValue, value));
-    setCarry(result < originalValue);
+    setCarry((originalValue + value) > 0xFF);
 }
 
 /**
