@@ -238,9 +238,9 @@ void CPU::SBC(uint8_t value) {
     // Set flags
     setZero(a == 0);
     setSubtract(1);
-    setHalfCarry(Bitwise::checkHalfCarrySub(originalValue, value + getCarry()));
+    setHalfCarry(Bitwise::checkHalfCarrySub(originalValue, value));
+    setHalfCarry(getHalfCarry() | Bitwise::checkHalfCarrySub(originalValue - value, getCarry()));
     setCarry((originalValue - value - getCarry()) < 0);
-
 }
 
 void CPU::SUB(uint8_t value) {
@@ -276,7 +276,7 @@ void CPU::ADD(uint16_t value) {
     // Set flags
     setSubtract(0);
     setHalfCarry(Bitwise::checkHalfCarryAdd(originalValue, value));
-    setCarry((originalValue + value) > 0xFF);
+    setCarry((originalValue + value) > 0xFFFF);
 }
 
 /**
@@ -1237,7 +1237,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 case 0x6: {
-                    ADD(memoryRead(pc));
+                    ADD(memoryRead(getHL()));
                     return 2;
                 }
                 case 0x7: {
@@ -1307,7 +1307,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 case 0x6: {
-                    SUB(memoryRead(pc));
+                    SUB(memoryRead(getHL()));
                     return 2;
                 }
                 case 0x7: {
@@ -1377,7 +1377,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 case 0x6: {
-                    AND(memoryRead(pc));
+                    AND(memoryRead(getHL()));
                     return 2;
                 }
                 case 0x7: {

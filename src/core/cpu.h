@@ -169,8 +169,9 @@ private:
             setZero(l == 0);
         } else if (regType == HL) {
             originalValue = memoryRead(getHL());
-            memoryWrite(getHL(), originalValue-1);
-            setZero(originalValue-1 == 0);
+            uint8_t newVal = originalValue - 1;
+            memoryWrite(getHL(), newVal);
+            setZero(newVal == 0);
         } else {
             Logger::err("{}", "Invalid register provided for DEC8 opcode. Must be A, B, C, D, E, H, L or HL");
             return;
@@ -217,8 +218,9 @@ private:
             setZero(l == 0);
         } else if (regType == HL) {
             originalValue = memoryRead(getHL());
-            memoryWrite(getHL(), originalValue+1);
-            setZero(originalValue+1 == 0);
+            uint8_t newVal = originalValue + 1;
+            memoryWrite(getHL(), newVal);
+            setZero(newVal == 0);
         } else {
             Logger::err("{}", "Invalid register provided for INC8 opcode. Must be A, B, C, D, E, H, L or HL");
             return;
