@@ -32,7 +32,7 @@ struct SingleTest {
     std::vector<Cycle> cycles {};
 };
 
-void performTest(SingleTest test) {
+void performTest(GameBoy *gb, SingleTest test) {
     CPUState startingState {
         .a = test.initial.a,
         .b = test.initial.b,
@@ -46,17 +46,15 @@ void performTest(SingleTest test) {
         .pc = test.initial.pc,
     };
 
-    GameBoy gb;
-    gb.initForTests();
-    gb.cpu.setState(startingState);
+    gb->cpu.setState(startingState);
 
     for (const auto &memVal : test.initial.ram) {
-        gb.mmu.memoryWrite(std::get<0>(memVal), std::get<1>(memVal));
+        gb->mmu.memoryWrite(std::get<0>(memVal), std::get<1>(memVal));
     }
 
-    gb.cpu.step();
+    gb->cpu.step();
 
-    CPUState actualState = gb.cpu.getState();
+    CPUState actualState = gb->cpu.getState();
     CPUState expectedState {
         .a = test.final.a,
         .b = test.final.b,
@@ -75,7 +73,7 @@ void performTest(SingleTest test) {
 
     bool ramMatch = true;
     for (const auto &memVal : test.final.ram) {
-        const auto value = gb.mmu.memoryRead(std::get<0>(memVal));
+        const auto value = gb->mmu.memoryRead(std::get<0>(memVal));
 
         actualMem << "\tAddr: " << +std::get<0>(memVal) << " Val: " << +value << '\n';
         expectedMem << "\tAddr: " << +std::get<0>(memVal) << " Val: " << +std::get<1>(memVal) << '\n';
@@ -94,7 +92,7 @@ void performTest(SingleTest test) {
     REQUIRE(ramMatch);
 }
 
-void testOpcode(const std::string &filename) {
+void testOpcode(GameBoy *gb, const std::string &filename) {
     fs::path filepath = "cputestdata" / fs::path(filename + ".json");
 
     std::ifstream file(filepath);
@@ -114,18 +112,20 @@ void testOpcode(const std::string &filename) {
     if (error) SKIP("Failed to parse JSON test data.");
 
     for (const auto &test : testData) {
-        performTest(test);
+        performTest(gb, test);
     }
 }
 
-TEST_CASE("CPU 8-bit arithmetic and logic instructions", "[arithmetic][8bitarith]") {
+TEST_CASE_METHOD(GameBoy, "CPU 8-bit arithmetic and logic instructions") {
+    initForTests();
+
     SECTION("ADC: Add with Carry") {
         constexpr std::string tests[] {
             "88", "89", "8A", "8B", "8C", "8D", "8E", "8F", "CE"
         };
 
         for (const std::string &test : tests) {
-            testOpcode(test);
+            testOpcode(this, test);
         }
     }
 
@@ -135,7 +135,7 @@ TEST_CASE("CPU 8-bit arithmetic and logic instructions", "[arithmetic][8bitarith
         };
 
         for (const std::string &test : tests) {
-            testOpcode(test);
+            testOpcode(this, test);
         }
     }
 
@@ -145,7 +145,7 @@ TEST_CASE("CPU 8-bit arithmetic and logic instructions", "[arithmetic][8bitarith
         };
 
         for (const std::string &test : tests) {
-            testOpcode(test);
+            testOpcode(this, test);
         }
     }
 
@@ -155,7 +155,7 @@ TEST_CASE("CPU 8-bit arithmetic and logic instructions", "[arithmetic][8bitarith
         };
 
         for (const std::string &test : tests) {
-            testOpcode(test);
+            testOpcode(this, test);
         }
     }
 
@@ -165,7 +165,7 @@ TEST_CASE("CPU 8-bit arithmetic and logic instructions", "[arithmetic][8bitarith
         };
 
         for (const std::string &test : tests) {
-            testOpcode(test);
+            testOpcode(this, test);
         }
     }
 
@@ -175,7 +175,7 @@ TEST_CASE("CPU 8-bit arithmetic and logic instructions", "[arithmetic][8bitarith
         };
 
         for (const std::string &test : tests) {
-            testOpcode(test);
+            testOpcode(this, test);
         }
     }
 
@@ -185,7 +185,7 @@ TEST_CASE("CPU 8-bit arithmetic and logic instructions", "[arithmetic][8bitarith
         };
 
         for (const std::string &test : tests) {
-            testOpcode(test);
+            testOpcode(this, test);
         }
     }
 
@@ -195,7 +195,7 @@ TEST_CASE("CPU 8-bit arithmetic and logic instructions", "[arithmetic][8bitarith
         };
 
         for (const std::string &test : tests) {
-            testOpcode(test);
+            testOpcode(this, test);
         }
     }
 
@@ -205,7 +205,7 @@ TEST_CASE("CPU 8-bit arithmetic and logic instructions", "[arithmetic][8bitarith
         };
 
         for (const std::string &test : tests) {
-            testOpcode(test);
+            testOpcode(this, test);
         }
     }
 
@@ -215,19 +215,21 @@ TEST_CASE("CPU 8-bit arithmetic and logic instructions", "[arithmetic][8bitarith
         };
 
         for (const std::string &test : tests) {
-            testOpcode(test);
+            testOpcode(this, test);
         }
     }
 }
 
-TEST_CASE("CPU 16-bit arithmetic instructions", "[arithmetic][16bitarith]") {
+TEST_CASE_METHOD(GameBoy, "CPU 16-bit arithmetic instructions") {
+    initForTests();
+
     SECTION("ADD: Add") {
         constexpr std::string tests[] {
             "09", "19", "29"
         };
 
         for (const std::string &test : tests) {
-            testOpcode(test);
+            testOpcode(this, test);
         }
     }
 
@@ -237,7 +239,7 @@ TEST_CASE("CPU 16-bit arithmetic instructions", "[arithmetic][16bitarith]") {
         };
 
         for (const std::string &test : tests) {
-            testOpcode(test);
+            testOpcode(this, test);
         }
     }
 
@@ -247,7 +249,7 @@ TEST_CASE("CPU 16-bit arithmetic instructions", "[arithmetic][16bitarith]") {
         };
 
         for (const std::string &test : tests) {
-            testOpcode(test);
+            testOpcode(this, test);
         }
     }
 }
