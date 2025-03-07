@@ -118,7 +118,7 @@ void testOpcode(const std::string &filename) {
     }
 }
 
-TEST_CASE("CPU 8-bit arithmetic and logic instructions") {
+TEST_CASE("CPU 8-bit arithmetic and logic instructions", "[arithmetic][8bitarith]") {
     SECTION("ADC: Add with Carry") {
         constexpr std::string tests[] {
             "88", "89", "8A", "8B", "8C", "8D", "8E", "8F", "CE"
@@ -130,44 +130,126 @@ TEST_CASE("CPU 8-bit arithmetic and logic instructions") {
     }
 
     SECTION("ADD: Add") {
+        constexpr std::string tests[] {
+            "80", "81", "82", "83", "84", "85", "86", "87", "C6"
+        };
 
+        for (const std::string &test : tests) {
+            testOpcode(test);
+        }
     }
 
     SECTION("AND: Logical AND") {
+        constexpr std::string tests[] {
+            "A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7", "E6"
+        };
 
+        for (const std::string &test : tests) {
+            testOpcode(test);
+        }
     }
 
     SECTION("CP: Compare") {
+        constexpr std::string tests[] {
+            "B8", "B9", "BA", "BB", "BC", "BD", "BE", "BF", "FE"
+        };
 
+        for (const std::string &test : tests) {
+            testOpcode(test);
+        }
     }
 
     SECTION("DEC: Decrement") {
+        constexpr std::string tests[] {
+            "05", "0D", "15", "1D", "25", "2D", "35", "3D"
+        };
 
+        for (const std::string &test : tests) {
+            testOpcode(test);
+        }
     }
 
     SECTION("INC: Increment") {
+        constexpr std::string tests[] {
+            "04", "0C", "14", "1C", "24", "2C", "34", "3C"
+        };
 
+        for (const std::string &test : tests) {
+            testOpcode(test);
+        }
     }
 
     SECTION("OR: Logical OR") {
+        constexpr std::string tests[] {
+            "B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "F6"
+        };
 
+        for (const std::string &test : tests) {
+            testOpcode(test);
+        }
     }
 
     SECTION("SBC: Subtract with Carry") {
+        constexpr std::string tests[] {
+            "98", "99", "9A", "9B", "9C", "9D", "9E", "9F", "DE"
+        };
 
+        for (const std::string &test : tests) {
+            testOpcode(test);
+        }
     }
 
-    SECTION("SBC: Subtract") {
+    SECTION("SUB: Subtract") {
+        constexpr std::string tests[] {
+            "90", "91", "92", "93", "94", "95", "96", "97", "D6"
+        };
 
+        for (const std::string &test : tests) {
+            testOpcode(test);
+        }
     }
 
     SECTION("XOR: Exclusive OR") {
+        constexpr std::string tests[] {
+            "A8", "A9", "AA", "AB", "AC", "AD", "AE", "AF", "EE"
+        };
 
+        for (const std::string &test : tests) {
+            testOpcode(test);
+        }
     }
 }
 
-TEST_CASE("CPU 16-bit arithmetic instructions") {
+TEST_CASE("CPU 16-bit arithmetic instructions", "[arithmetic][16bitarith]") {
+    SECTION("ADD: Add") {
+        constexpr std::string tests[] {
+            "09", "19", "29"
+        };
 
+        for (const std::string &test : tests) {
+            testOpcode(test);
+        }
+    }
+
+    SECTION("DEC: Decrement") {
+        constexpr std::string tests[] {
+            "0B", "1B", "2B", "3B"
+        };
+
+        for (const std::string &test : tests) {
+            testOpcode(test);
+        }
+    }
+
+    SECTION("INC: Increment") {
+        constexpr std::string tests[] {
+            "03", "13", "23", "33"
+        };
+
+        for (const std::string &test : tests) {
+            testOpcode(test);
+        }
+    }
 }
 
 TEST_CASE("CPU bit operation instructions") {
