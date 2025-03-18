@@ -30,7 +30,7 @@ namespace Bitwise {
 
     // Modifies a specific bit in a 8-bit value
     inline uint8_t modifyBitInByte(uint8_t value, uint8_t n, uint8_t newVal) {
-        return (value & ~(1 << n)) | (newVal << n);
+        return (value & ~(1 << n)) | ((newVal & 1) << n);
     }
 
     // Grabs the first 4-bits from a byte
