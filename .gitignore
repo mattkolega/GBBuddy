@@ -4,6 +4,10 @@ build/
 # VSCode specific directories
 .vscode
 
+# JetBrains
+.idea
+cmake-build-*
+
 # macOS specific files
 .DS_Store
 
