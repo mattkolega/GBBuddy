@@ -84,11 +84,11 @@ void CPU::printState() {
 }
 
 uint8_t CPU::memoryRead(uint16_t address) {
-    return gb->mmu.memoryRead(address);
+    return gb->mmu->memoryRead(address);
 }
 
 void CPU::memoryWrite(uint16_t address, uint8_t value) {
-    gb->mmu.memoryWrite(address, value);
+    gb->mmu->memoryWrite(address, value);
 }
 
 uint16_t CPU::getAF() {
@@ -97,7 +97,7 @@ uint16_t CPU::getAF() {
 
 void CPU::setAF(uint16_t value) {
     a = (value >> 8) & 0xFF;
-    f = value & 0xFF;
+    f = value & 0xF0;
 }
 
 uint16_t CPU::getBC() {
@@ -284,7 +284,7 @@ Bit Operation Instructions
  */
 
 void CPU::BIT(uint8_t bitPos, uint8_t value) {
-    setZero((value & bitPos) == 0);
+    setZero(Bitwise::getBitInByte(value, bitPos) == 0);
     setSubtract(0);
     setHalfCarry(1);
 }
@@ -496,7 +496,7 @@ void CPU::ADD_HL_SP() {
     // Set flags
     setSubtract(0);
     setHalfCarry(Bitwise::checkHalfCarryAdd(originalValue, sp));
-    setCarry(result < originalValue);
+    setCarry((originalValue + sp) > 0xFFFF);
 }
 
 void CPU::ADD_SP_e8(int8_t value) {
@@ -507,8 +507,8 @@ void CPU::ADD_SP_e8(int8_t value) {
     // Set flags
     setZero(0);
     setSubtract(0);
-    setHalfCarry(Bitwise::checkHalfCarryAdd(originalValue, value));
-    setCarry(result < originalValue);
+    setHalfCarry(Bitwise::checkHalfCarryAdd(static_cast<uint8_t>(originalValue), value));
+    setCarry(((originalValue & 0xFF) + static_cast<uint8_t>(value)) > 0xFF);
 }
 
 void CPU::LD_SP_n16(uint16_t value) {
@@ -522,12 +522,12 @@ void CPU::LD_n16_SP(uint16_t address) {
 
 void CPU::LD_HL_SP(int8_t value) {
     uint16_t result = sp + value;
-    setHL(value);
+    setHL(result);
 
     setZero(0);
     setSubtract(0);
-    setHalfCarry(Bitwise::checkHalfCarryAdd(sp, value));
-    setCarry(result < sp);
+    setHalfCarry(Bitwise::checkHalfCarryAdd(static_cast<uint8_t>(sp), value));
+    setCarry(((sp & 0xFF) + static_cast<uint8_t>(value)) > 0xFF);
 }
 
 void CPU::LD_SP_HL() {
@@ -548,8 +548,8 @@ void CPU::CPL() {
     a = ~a;
 
     // Set flags
-    setSubtract(0);
-    setHalfCarry(0);
+    setSubtract(1);
+    setHalfCarry(1);
 }
 
 void CPU::DAA() {
@@ -681,7 +681,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(opcode);
             }
         }
         case 0x1: {
@@ -756,7 +756,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(opcode);
             }
         }
         case 0x2: {
@@ -842,7 +842,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(opcode);
             }
         }
         case 0x3: {
@@ -925,9 +925,10 @@ size_t CPU::opDecode() {
                 }
                 case 0xF: {
                     CCF();
+                    return 1;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(opcode);
             }
         }
         case 0x4: {
@@ -997,7 +998,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(opcode);
             }
         }
         case 0x5: {
@@ -1067,7 +1068,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(opcode);
             }
         }
         case 0x6: {
@@ -1137,7 +1138,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(opcode);
             }
         }
         case 0x7: {
@@ -1171,7 +1172,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 case 0x7: {
-                    LD_HL(b);
+                    LD_HL(a);
                     return 2;
                 }
                 case 0x8: {
@@ -1207,7 +1208,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(opcode);
             }
         }
         case 0x8: {
@@ -1277,7 +1278,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(opcode);
             }
         }
         case 0x9: {
@@ -1347,7 +1348,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(opcode);
             }
         }
         case 0xA: {
@@ -1417,7 +1418,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(opcode);
             }
         }
         case 0xB: {
@@ -1487,7 +1488,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(opcode);
             }
         }
         case 0xC: {
@@ -1598,7 +1599,7 @@ size_t CPU::opDecode() {
                     return 4;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(opcode);
             }
         }
         case 0xD: {
@@ -1694,7 +1695,7 @@ size_t CPU::opDecode() {
                     return 4;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(opcode);
             }
         }
         case 0xE: {
@@ -1750,7 +1751,7 @@ size_t CPU::opDecode() {
                     return 4;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(opcode);
             }
         }
         case 0xF: {
@@ -1814,11 +1815,11 @@ size_t CPU::opDecode() {
                     return 4;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(opcode);
             }
         }
         default:
-            return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+            return logInvalidOpcode(opcode);
     }
 }
 

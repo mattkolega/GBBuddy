@@ -302,21 +302,21 @@ private:
         using enum RegisterType;
 
         if constexpr (regType == A) {
-            a &= ~bitPos;
+            a = Bitwise::modifyBitInByte(a, bitPos, 0);
         } else if (regType == B) {
-            b &= ~bitPos;
+            b = Bitwise::modifyBitInByte(b, bitPos, 0);
         } else if (regType == C) {
-            c &= ~bitPos;
+            c = Bitwise::modifyBitInByte(c, bitPos, 0);
         } else if (regType == D) {
-            d &= ~bitPos;
+            d = Bitwise::modifyBitInByte(d, bitPos, 0);
         } else if (regType == E) {
-            e &= ~bitPos;
+            e = Bitwise::modifyBitInByte(e, bitPos, 0);
         } else if (regType == H) {
-            h &= ~bitPos;
+            h = Bitwise::modifyBitInByte(h, bitPos, 0);
         } else if (regType == L) {
-            l &= ~bitPos;
+            l = Bitwise::modifyBitInByte(l, bitPos, 0);
         } else if (regType == HL) {
-            auto newValue = memoryRead(getHL()) & ~bitPos;
+            auto newValue = Bitwise::modifyBitInByte(memoryRead(getHL()), bitPos, 0);
             memoryWrite(getHL(), newValue);
         } else {
             Logger::err("{}", "Invalid register provided for RES opcode. Must be A, B, C, D, E, H, L or HL");
@@ -329,21 +329,21 @@ private:
         using enum RegisterType;
 
         if constexpr (regType == A) {
-            a |= bitPos;
+            a = Bitwise::modifyBitInByte(a, bitPos, 1);
         } else if (regType == B) {
-            b |= bitPos;
+            b = Bitwise::modifyBitInByte(b, bitPos, 1);
         } else if (regType == C) {
-            c |= bitPos;
+            c = Bitwise::modifyBitInByte(c, bitPos, 1);
         } else if (regType == D) {
-            d |= bitPos;
+            d = Bitwise::modifyBitInByte(d, bitPos, 1);
         } else if (regType == E) {
-            e |= bitPos;
+            e = Bitwise::modifyBitInByte(e, bitPos, 1);
         } else if (regType == H) {
-            h |= bitPos;
+            h = Bitwise::modifyBitInByte(h, bitPos, 1);
         } else if (regType == L) {
-            l |= bitPos;
+            l = Bitwise::modifyBitInByte(l, bitPos, 1);
         } else if (regType == HL) {
-            auto newValue = memoryRead(getHL()) | bitPos;
+            auto newValue = Bitwise::modifyBitInByte(memoryRead(getHL()), bitPos, 1);
             memoryWrite(getHL(), newValue);
         } else {
             Logger::err("{}", "Invalid register provided for SET opcode. Must be A, B, C, D, E, H, L or HL");
@@ -379,6 +379,7 @@ private:
         } else if (regType == HL) {
             auto newValue = Bitwise::swapNibbles(memoryRead(getHL()));
             memoryWrite(getHL(), newValue);
+            setZero(newValue == 0);
         } else {
             Logger::err("{}", "Invalid register provided for SWAP opcode. Must be A, B, C, D, E, H, L or HL");
             return;
@@ -603,7 +604,7 @@ private:
             l <<= 1;
             setZero(l == 0);
         } else if (regType == HL) {
-            auto newVal = getHL();
+            auto newVal = memoryRead(getHL());
             setCarry(Bitwise::getBitInByte(newVal, 7));
             newVal <<= 1;
             memoryWrite(getHL(), newVal);
@@ -624,36 +625,44 @@ private:
 
         if constexpr (regType == A) {
             setCarry(Bitwise::getBitInByte(a, 0));
-            a = (a >> 1) | (getCarry() << 7);
+            uint8_t bit7 = Bitwise::getBitInByte(a, 7);
+            a = (a >> 1) | (bit7 << 7);
             setZero(a == 0);
         } else if (regType == B) {
             setCarry(Bitwise::getBitInByte(b, 0));
-            b = (b >> 1) | (getCarry() << 7);
+            uint8_t bit7 = Bitwise::getBitInByte(b, 7);
+            b = (b >> 1) | (bit7 << 7);
             setZero(b == 0);
         } else if (regType == C) {
             setCarry(Bitwise::getBitInByte(c, 0));
-            c = (c >> 1) | (getCarry() << 7);
+            uint8_t bit7 = Bitwise::getBitInByte(c, 7);
+            c = (c >> 1) | (bit7 << 7);
             setZero(c == 0);
         } else if (regType == D) {
             setCarry(Bitwise::getBitInByte(d, 0));
-            d = (d >> 1) | (getCarry() << 7);
+            uint8_t bit7 = Bitwise::getBitInByte(d, 7);
+            d = (d >> 1) | (bit7 << 7);
             setZero(d == 0);
         } else if (regType == E) {
             setCarry(Bitwise::getBitInByte(e, 0));
-            e = (e >> 1) | (getCarry() << 7);
+            uint8_t bit7 = Bitwise::getBitInByte(e, 7);
+            e = (e >> 1) | (bit7 << 7);
             setZero(e == 0);
         } else if (regType == H) {
             setCarry(Bitwise::getBitInByte(h, 0));
-            h = (h >> 1) | (getCarry() << 7);
+            uint8_t bit7 = Bitwise::getBitInByte(h, 7);
+            h = (h >> 1) | (bit7 << 7);
             setZero(h == 0);
         } else if (regType == L) {
             setCarry(Bitwise::getBitInByte(l, 0));
-            l = (l >> 1) | (getCarry() << 7);
+            uint8_t bit7 = Bitwise::getBitInByte(l, 7);
+            l = (l >> 1) | (bit7 << 7);
             setZero(l == 0);
         } else if (regType == HL) {
-            auto newVal = getHL();
+            auto newVal = memoryRead(getHL());
             setCarry(Bitwise::getBitInByte(newVal, 0));
-            newVal = (newVal >> 1) | (getCarry() << 7);
+            uint8_t bit7 = Bitwise::getBitInByte(newVal, 7);
+            newVal = (newVal >> 1) | (bit7 << 7);
             memoryWrite(getHL(), newVal);
             setZero(newVal == 0);
         } else {
@@ -699,7 +708,7 @@ private:
             l >>= 1;
             setZero(l == 0);
         } else if (regType == HL) {
-            auto newVal = getHL();
+            auto newVal = memoryRead(getHL());
             setCarry(Bitwise::getBitInByte(newVal, 0));
             newVal >>= 1;
             memoryWrite(getHL(), newVal);
