@@ -8,7 +8,7 @@ class GameBoy {
 public:
     Cartridge cartridge;
     CPU cpu;
-    MMU mmu;
+    std::unique_ptr<MMU> mmu;
 
     GameBoy();
 

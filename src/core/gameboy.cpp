@@ -3,7 +3,6 @@
 GameBoy::GameBoy()
     : cartridge(this)
     , cpu(this)
-    , mmu(this)
 {
 }
 
@@ -21,10 +20,12 @@ void GameBoy::init() {
         .pc = 0x0100,
     });
     cartridge.init();
+    mmu = std::make_unique<RealMMU>(this);
 }
 
 void GameBoy::initForTests() {
     cartridge.initForTests();
+    mmu = std::make_unique<MockMMU>();
 }
 
 void GameBoy::run() {
