@@ -22,6 +22,7 @@ struct SM83State {
     uint16_t sp {};
     uint8_t ime {};
     uint8_t ie {};
+    uint8_t ei {};
     std::vector<std::tuple<uint16_t, uint8_t>> ram {};
 };
 
@@ -49,7 +50,7 @@ void performTest(GameBoy *gb, SingleTest test) {
     gb->cpu.setState(startingState);
 
     for (const auto &memVal : test.initial.ram) {
-        gb->mmu.memoryWrite(std::get<0>(memVal), std::get<1>(memVal));
+        gb->mmu->memoryWrite(std::get<0>(memVal), std::get<1>(memVal));
     }
 
     gb->cpu.step();
@@ -73,14 +74,13 @@ void performTest(GameBoy *gb, SingleTest test) {
 
     bool ramMatch = true;
     for (const auto &memVal : test.final.ram) {
-        const auto value = gb->mmu.memoryRead(std::get<0>(memVal));
+        const auto value = gb->mmu->memoryRead(std::get<0>(memVal));
 
         actualMem << "\tAddr: " << +std::get<0>(memVal) << " Val: " << +value << '\n';
         expectedMem << "\tAddr: " << +std::get<0>(memVal) << " Val: " << +std::get<1>(memVal) << '\n';
 
         if (value != std::get<1>(memVal)) {
             ramMatch = false;
-            break;
         }
     }
 
