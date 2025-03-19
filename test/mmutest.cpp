@@ -6,13 +6,14 @@
 #include <core/gameboy.h>
 
 void testWriteAndRead(GameBoy &gb, uint16_t addr, uint8_t value) {
-    gb.mmu.memoryWrite(addr, value);
-    REQUIRE(gb.mmu.memoryRead(addr) == value);
+    gb.mmu->memoryWrite(addr, value);
+    REQUIRE(gb.mmu->memoryRead(addr) == value);
 }
 
 TEST_CASE("Memory writes are successful") {
     GameBoy gb;
     gb.initForTests();
+    gb.mmu = std::make_unique<RealMMU>(&gb);
 
     // Setup random number generation
     std::mt19937 mt{ std::random_device{}() };
