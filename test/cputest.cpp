@@ -33,7 +33,7 @@ struct SingleTest {
     std::vector<Cycle> cycles {};
 };
 
-void performTest(GameBoy *gb, SingleTest test) {
+void performTest(GameBoy *gb, const SingleTest &test) {
     CPUState startingState {
         .a = test.initial.a,
         .b = test.initial.b,
