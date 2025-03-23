@@ -28,7 +28,7 @@ FetchContent_Declare(
 FetchContent_Declare(
     SDL3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-    GIT_TAG release-3.2.0
+    GIT_TAG release-3.2.8
     GIT_SHALLOW 1
 )
 # Get tinyfiledialogs for native dialogs
@@ -50,6 +50,7 @@ add_subdirectory(test)
 
 add_executable(gbbuddy
     src/main.cpp
+    src/application.cpp
 )
 
 target_link_libraries(gbbuddy
