@@ -23,6 +23,8 @@ struct CartHeader {
 
 class Cartridge {
 public:
+    CartHeader cartHeader;
+
     Cartridge() = delete;
     Cartridge(GameBoy *gb);
 
@@ -36,8 +38,6 @@ public:
     void romWrite(uint16_t address, uint8_t value);
 
 private:
-    CartHeader m_cartHeader;
-
     std::unique_ptr<Mapper> mapper;
 
     std::vector<uint8_t> m_rom {};

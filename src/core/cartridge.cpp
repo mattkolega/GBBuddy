@@ -62,7 +62,7 @@ void Cartridge::verifyCartHeader() {
 
     size_t titleIndex { 0x0134 };
 
-    for (int i = titleIndex; i <= 0x0143; titleIndex += 1) {
+    for (size_t i = titleIndex; i <= 0x0143; i++) {
         if (m_rom[i] == 0x00) break;
         cartHeader.title += m_rom[i];
     }
@@ -99,12 +99,12 @@ void Cartridge::verifyCartHeader() {
     cartHeader.headerChecksum = m_rom[0x014D];
     cartHeader.globalChecksum = Bitwise::concatBytes(m_rom[0x014E], m_rom[0x014F]);
 
-    m_cartHeader = cartHeader;
+    this->cartHeader = cartHeader;
 }
 
 void Cartridge::setMapper() {
-    switch (m_cartHeader.cartType) {
-        case 0x01:
+    switch (cartHeader.cartType) {
+        case 0x00:
             mapper = std::make_unique<NoMBC>(*this);
             break;
         default:
