@@ -2,6 +2,8 @@
 
 #include <SDL3/SDL.h>
 
+#include <core/gameboy.h>
+
 class Application {
 public:
     ~Application();
@@ -9,6 +11,8 @@ public:
     void init();
     void run();
 private:
+    GameBoy gb;
+
     SDL_Window *m_window   { nullptr };
     SDL_Renderer *m_renderer { nullptr };
     SDL_Texture *m_texture   { nullptr };

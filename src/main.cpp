@@ -1,11 +1,10 @@
-#include <core/gameboy.h>
+#include "application.h"
 
 int main() {
-    GameBoy gb;
+    Application app;
+    app.init();
 
-    while (true) {
-        gb.run();
-    }
+    app.run();
 
     return 0;
 }

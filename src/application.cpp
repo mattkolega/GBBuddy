@@ -1,12 +1,15 @@
 #include "application.h"
 
+#include <chrono>
 #include <stdexcept>
 #include <string>
+#include <thread>
 
 #include <common/logger.h>
 
 static constexpr int SCREEN_WIDTH  { 640 };
 static constexpr int SCREEN_HEIGHT { 576 };
+static constexpr int FPS { 60 };
 
 Application::~Application() {
     close();
@@ -35,12 +38,32 @@ void Application::init() {
     if (m_texture == nullptr) {
         throw std::runtime_error("SDL texture could not be created! SDL_Error: " + std::string(SDL_GetError()));
     }
+
+    gb.init();
+
+    if (gb.cartridge.cartHeader.title[0] != '\0') {
+        std::string title = "GBBuddy | " + gb.cartridge.cartHeader.title;
+        SDL_SetWindowTitle(m_window, title.c_str());
+    }
 }
 
 void Application::run() {
     while (!m_quit) {
+        auto frameStart = std::chrono::steady_clock::now();
+        constexpr auto nsPerSec = std::chrono::nanoseconds(std::chrono::seconds(1));
+        auto frameDeadline = frameStart + (nsPerSec / FPS);
+
         handleEvents();
+
+        for (int i = 0; i < (gb.cyclesPerSecond / FPS); i++) {
+            gb.run();
+        }
+
         updateDisplay();
+
+        auto frameEnd = std::chrono::steady_clock::now();
+
+        if (frameDeadline > frameEnd) std::this_thread::sleep_for(frameDeadline - frameEnd);
     }
 }
 
