@@ -49,7 +49,7 @@ public:
     CPU(GameBoy *gb);
 
     // Executes a single opcode. Returns number of cycles
-    size_t step();
+    void step();
 
     // Sets CPU state
     void setState(CPUState state);
@@ -77,6 +77,8 @@ private:
     uint8_t ime;  // Interrupt master enable flag
 
     GameBoy *gb;
+
+    size_t cycleDelay { 0 };
 
     // Wrappers for MMU memory access
     uint8_t memoryRead(uint16_t address);

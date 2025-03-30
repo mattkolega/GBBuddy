@@ -44,8 +44,9 @@ CPU::CPU(GameBoy *gb)
 {
 }
 
-size_t CPU::step() {
-    return opDecode();
+void CPU::step() {
+    if ( cycleDelay == 0 ) cycleDelay = (4 * opDecode());
+    cycleDelay--;
 }
 
 void CPU::setState(CPUState state) {
