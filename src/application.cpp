@@ -5,7 +5,11 @@
 #include <string>
 #include <thread>
 
+#include <fmt/base.h>
+
 #include <common/logger.h>
+
+#include "version.h"
 
 static constexpr int SCREEN_WIDTH  { 640 };
 static constexpr int SCREEN_HEIGHT { 576 };
@@ -16,13 +20,15 @@ Application::~Application() {
 }
 
 void Application::init() {
-    SDL_SetAppMetadata("GBBuddy", "0.1", "com.mattkolega.gbbuddy");
+    SDL_SetAppMetadata("GBBuddy", GBBUDDY_VERSION, "com.mattkolega.gbbuddy");
 
     if(!SDL_Init(SDL_INIT_VIDEO)) {
         throw std::runtime_error("SDL could not be initialised! SDL_Error: " + std::string(SDL_GetError()));
     }
 
-    m_window = SDL_CreateWindow("GBBuddy", SCREEN_WIDTH, SCREEN_HEIGHT, 0);
+    std::string windowTitle = fmt::format("GBBuddy ({})", GBBUDDY_VERSION);
+
+    m_window = SDL_CreateWindow(windowTitle.c_str(), SCREEN_WIDTH, SCREEN_HEIGHT, 0);
     if (m_window == nullptr) {
         throw std::runtime_error("SDL window could not be created! SDL_Error: " + std::string(SDL_GetError()));
     }
@@ -42,8 +48,8 @@ void Application::init() {
     gb.init();
 
     if (gb.cartridge.cartHeader.title[0] != '\0') {
-        std::string title = "GBBuddy | " + gb.cartridge.cartHeader.title;
-        SDL_SetWindowTitle(m_window, title.c_str());
+        windowTitle = fmt::format("GBBuddy ({}) | {}", GBBUDDY_VERSION, gb.cartridge.cartHeader.title);
+        SDL_SetWindowTitle(m_window, windowTitle.c_str());
     }
 }
 
