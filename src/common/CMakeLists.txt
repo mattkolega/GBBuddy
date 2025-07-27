@@ -1,17 +1,15 @@
 add_library(common STATIC
+    bitwise.h
     dialog.cpp
+    dialog.h
+    logger.h
 )
 
 target_link_libraries(common
-    PUBLIC
-        fmt::fmt  # Public because it's included in logger.h which is used by other targets
+    INTERFACE
+        fmt::fmt
     PRIVATE
         tinyfiledialogs_lib
 )
 
-target_include_directories(common
-    PUBLIC
-        ${CMAKE_CURRENT_SOURCE_DIR}/..
-    PRIVATE
-        ${tinyfiledialogs_SOURCE_DIR}
-)
+target_include_directories(common PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/..)
