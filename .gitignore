@@ -1,20 +1,21 @@
-# Build directories
-build/
+# Build folders
+[Bb]uild/
 
-# VSCode specific directories
-.vscode
+# Language server
+.cache/
+compile_commands.json
+
+# VSCode
+.vscode/
 
 # JetBrains
-.idea
-cmake-build-*
+.idea/
+cmake-build-*/
 
-# macOS specific files
+# macOS
 .DS_Store
 
-# clangd directories
-.cache/
-
-# CTest directories
+# CTest folders
 Testing/
 
 # Prerequisites
