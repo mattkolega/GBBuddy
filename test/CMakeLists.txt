@@ -2,20 +2,21 @@
 FetchContent_Declare(
     Catch2
     GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-    GIT_TAG        v3.4.0
-    GIT_SHALLOW TRUE
+    GIT_TAG        v3.15.1
+    GIT_SHALLOW    TRUE
 )
 # Needed for parsing JSON
 FetchContent_Declare(
     glaze
     GIT_REPOSITORY https://github.com/stephenberry/glaze.git
-    GIT_TAG        v4.4.3
-    GIT_SHALLOW TRUE
+    GIT_TAG        v7.8.3
+    GIT_SHALLOW    TRUE
 )
 FetchContent_Declare(
     sm83tests
     GIT_REPOSITORY https://github.com/SingleStepTests/sm83
     GIT_TAG        main
+    GIT_SHALLOW    TRUE
 )
 FetchContent_MakeAvailable(Catch2 glaze sm83tests)
 

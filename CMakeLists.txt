@@ -18,20 +18,22 @@ include(FetchContent)
 FetchContent_Declare(
     fmt
     GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-    GIT_TAG 11.2.0
+    GIT_TAG        12.2.0
+    GIT_SHALLOW    TRUE
 )
 # Get SDL3 for multimedia functionality
 FetchContent_Declare(
     SDL3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-    GIT_TAG release-3.2.18
+    GIT_TAG        release-3.4.10
+    GIT_SHALLOW    TRUE
 )
 # Get tinyfiledialogs for native dialogs
 FetchContent_Declare(
     tinyfiledialogs
     GIT_REPOSITORY https://git.code.sf.net/p/tinyfiledialogs/code
-    GIT_TAG master
-    GIT_SHALLOW 1
+    GIT_TAG        master
+    GIT_SHALLOW    TRUE
 )
 
 # Stop SDL from compiling tests
