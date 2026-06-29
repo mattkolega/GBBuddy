@@ -3,9 +3,9 @@
 #include <stdexcept>
 #include <fstream>
 
-#include <common/bitwise.h>
-#include <common/dialog.h>
-#include <common/logger.h>
+#include "common/bits.h"
+#include "common/dialog.h"
+#include "common/log.h"
 
 #include "mappers/nombc.h"
 
@@ -42,7 +42,7 @@ void Cartridge::loadGBFile() {
     std::ifstream romFile(filepath, std::ios::binary);
     if (!romFile) throw std::runtime_error("Failed to open ROM file: " + filepath);
 
-    Logger::info("{} {}", "Loaded ROM: ", filepath);
+    log::info("{} {}", "Loaded ROM: ", filepath);
 
     romFile.seekg(0, std::ios::end);
     auto fileSize = romFile.tellg();
@@ -90,14 +90,14 @@ void Cartridge::verifyCartHeader() {
             break;
         default:
             cartHeader.ramBanks = 0;
-            Logger::warn("{} 0x{:X}", "Unknown value given for number of RAM banks:", m_rom[0x0149]);
+            log::warn("{} 0x{:X}", "Unknown value given for number of RAM banks:", m_rom[0x0149]);
             break;
     }
 
     m_ram.resize((1024 * 8) * cartHeader.ramBanks);
 
     cartHeader.headerChecksum = m_rom[0x014D];
-    cartHeader.globalChecksum = Bitwise::concatBytes(m_rom[0x014E], m_rom[0x014F]);
+    cartHeader.globalChecksum = bits::concatBytes(m_rom[0x014E], m_rom[0x014F]);
 
     this->cartHeader = cartHeader;
 }

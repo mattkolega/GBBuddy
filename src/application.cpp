@@ -7,7 +7,7 @@
 
 #include <fmt/base.h>
 
-#include <common/logger.h>
+#include "common/log.h"
 
 #include "version.h"
 
@@ -38,7 +38,7 @@ void Application::init() {
         throw std::runtime_error("SDL rendering context could not be created! SDL_Error: " + std::string(SDL_GetError()));
     }
 
-    Logger::info("SDL Renderer: {}", SDL_GetRendererName(m_renderer));
+    log::info("SDL Renderer: {}", SDL_GetRendererName(m_renderer));
 
     m_texture = SDL_CreateTexture(m_renderer, SDL_PIXELFORMAT_RGB24, SDL_TEXTUREACCESS_TARGET, SCREEN_HEIGHT, SCREEN_HEIGHT);
     if (m_texture == nullptr) {
@@ -61,9 +61,9 @@ void Application::run() {
 
         handleEvents();
 
-        for (int i = 0; i < (gb.cyclesPerSecond / FPS); i++) {
-            gb.run();
-        }
+        // for (int i = 0; i < (gb.cyclesPerSecond / FPS); i++) {
+        //     gb.run();
+        // }
 
         updateDisplay();
 

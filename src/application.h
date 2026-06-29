@@ -2,7 +2,7 @@
 
 #include <SDL3/SDL.h>
 
-#include <core/gameboy.h>
+#include "core/gameboy.h"
 
 class Application {
 public:

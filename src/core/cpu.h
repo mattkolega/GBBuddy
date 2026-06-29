@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-#include <common/bitwise.h>
-#include <common/logger.h>
+#include "common/bits.h"
+#include "common/log.h"
 
 class GameBoy;
 
@@ -128,7 +128,7 @@ private:
     // Adds value to accumulator
     void ADD(uint8_t value);
 
-    // Bitwise AND of accumualtor and value
+    // bits AND of accumualtor and value
     void AND(uint8_t value);
 
     // Compares accumulator and value
@@ -175,12 +175,12 @@ private:
             memoryWrite(getHL(), newVal);
             setZero(newVal == 0);
         } else {
-            Logger::err("{}", "Invalid register provided for DEC8 opcode. Must be A, B, C, D, E, H, L or HL");
+            log::err("{}", "Invalid register provided for DEC8 opcode. Must be A, B, C, D, E, H, L or HL");
             return;
         }
 
         setSubtract(1);
-        setHalfCarry(Bitwise::checkHalfCarrySub(originalValue, 1));
+        setHalfCarry(bits::checkHalfCarrySub(originalValue, 1));
     }
 
     // Increments 8-bit value
@@ -224,15 +224,15 @@ private:
             memoryWrite(getHL(), newVal);
             setZero(newVal == 0);
         } else {
-            Logger::err("{}", "Invalid register provided for INC8 opcode. Must be A, B, C, D, E, H, L or HL");
+            log::err("{}", "Invalid register provided for INC8 opcode. Must be A, B, C, D, E, H, L or HL");
             return;
         }
 
         setSubtract(0);
-        setHalfCarry(Bitwise::checkHalfCarryAdd(originalValue, 1));
+        setHalfCarry(bits::checkHalfCarryAdd(originalValue, 1));
     }
 
-    // Bitwise OR of accumulator and value
+    // bits OR of accumulator and value
     void OR(uint8_t value);
 
     // Subtracts value and carry bit from accumulator
@@ -241,7 +241,7 @@ private:
     // Subtracts value from accumulator
     void SUB(uint8_t value);
 
-    // Bitwise XOR of accumulator and value
+    // bits XOR of accumulator and value
     void XOR(uint8_t value);
 
     /*
@@ -267,7 +267,7 @@ private:
         } else if (regType == SP) {
             sp--;
         } else {
-            Logger::err("{}", "Invalid register provided for DEC16 opcode. Must be AF, BC, DE, HL or SP");
+            log::err("{}", "Invalid register provided for DEC16 opcode. Must be AF, BC, DE, HL or SP");
         }
     }
 
@@ -287,7 +287,7 @@ private:
         } else if (regType == SP) {
             sp++;
         } else {
-            Logger::err("{}", "Invalid register provided for INC16 opcode. Must be AF, BC, DE, HL or SP");
+            log::err("{}", "Invalid register provided for INC16 opcode. Must be AF, BC, DE, HL or SP");
         }
     }
 
@@ -304,24 +304,24 @@ private:
         using enum RegisterType;
 
         if constexpr (regType == A) {
-            a = Bitwise::modifyBitInByte(a, bitPos, 0);
+            a = bits::modifyBitInByte(a, bitPos, 0);
         } else if (regType == B) {
-            b = Bitwise::modifyBitInByte(b, bitPos, 0);
+            b = bits::modifyBitInByte(b, bitPos, 0);
         } else if (regType == C) {
-            c = Bitwise::modifyBitInByte(c, bitPos, 0);
+            c = bits::modifyBitInByte(c, bitPos, 0);
         } else if (regType == D) {
-            d = Bitwise::modifyBitInByte(d, bitPos, 0);
+            d = bits::modifyBitInByte(d, bitPos, 0);
         } else if (regType == E) {
-            e = Bitwise::modifyBitInByte(e, bitPos, 0);
+            e = bits::modifyBitInByte(e, bitPos, 0);
         } else if (regType == H) {
-            h = Bitwise::modifyBitInByte(h, bitPos, 0);
+            h = bits::modifyBitInByte(h, bitPos, 0);
         } else if (regType == L) {
-            l = Bitwise::modifyBitInByte(l, bitPos, 0);
+            l = bits::modifyBitInByte(l, bitPos, 0);
         } else if (regType == HL) {
-            auto newValue = Bitwise::modifyBitInByte(memoryRead(getHL()), bitPos, 0);
+            auto newValue = bits::modifyBitInByte(memoryRead(getHL()), bitPos, 0);
             memoryWrite(getHL(), newValue);
         } else {
-            Logger::err("{}", "Invalid register provided for RES opcode. Must be A, B, C, D, E, H, L or HL");
+            log::err("{}", "Invalid register provided for RES opcode. Must be A, B, C, D, E, H, L or HL");
         }
     }
 
@@ -331,24 +331,24 @@ private:
         using enum RegisterType;
 
         if constexpr (regType == A) {
-            a = Bitwise::modifyBitInByte(a, bitPos, 1);
+            a = bits::modifyBitInByte(a, bitPos, 1);
         } else if (regType == B) {
-            b = Bitwise::modifyBitInByte(b, bitPos, 1);
+            b = bits::modifyBitInByte(b, bitPos, 1);
         } else if (regType == C) {
-            c = Bitwise::modifyBitInByte(c, bitPos, 1);
+            c = bits::modifyBitInByte(c, bitPos, 1);
         } else if (regType == D) {
-            d = Bitwise::modifyBitInByte(d, bitPos, 1);
+            d = bits::modifyBitInByte(d, bitPos, 1);
         } else if (regType == E) {
-            e = Bitwise::modifyBitInByte(e, bitPos, 1);
+            e = bits::modifyBitInByte(e, bitPos, 1);
         } else if (regType == H) {
-            h = Bitwise::modifyBitInByte(h, bitPos, 1);
+            h = bits::modifyBitInByte(h, bitPos, 1);
         } else if (regType == L) {
-            l = Bitwise::modifyBitInByte(l, bitPos, 1);
+            l = bits::modifyBitInByte(l, bitPos, 1);
         } else if (regType == HL) {
-            auto newValue = Bitwise::modifyBitInByte(memoryRead(getHL()), bitPos, 1);
+            auto newValue = bits::modifyBitInByte(memoryRead(getHL()), bitPos, 1);
             memoryWrite(getHL(), newValue);
         } else {
-            Logger::err("{}", "Invalid register provided for SET opcode. Must be A, B, C, D, E, H, L or HL");
+            log::err("{}", "Invalid register provided for SET opcode. Must be A, B, C, D, E, H, L or HL");
         }
     }
 
@@ -358,32 +358,32 @@ private:
         using enum RegisterType;
 
         if constexpr (regType == A) {
-            a = Bitwise::swapNibbles(a);
+            a = bits::swapNibbles(a);
             setZero(a == 0);
         } else if (regType == B) {
-            b = Bitwise::swapNibbles(b);
+            b = bits::swapNibbles(b);
             setZero(b == 0);
         } else if (regType == C) {
-            c = Bitwise::swapNibbles(c);
+            c = bits::swapNibbles(c);
             setZero(c == 0);
         } else if (regType == D) {
-            d = Bitwise::swapNibbles(d);
+            d = bits::swapNibbles(d);
             setZero(d == 0);
         } else if (regType == E) {
-            e = Bitwise::swapNibbles(e);
+            e = bits::swapNibbles(e);
             setZero(e == 0);
         } else if (regType == H) {
-            h = Bitwise::swapNibbles(h);
+            h = bits::swapNibbles(h);
             setZero(h == 0);
         } else if (regType == L) {
-            l = Bitwise::swapNibbles(l);
+            l = bits::swapNibbles(l);
             setZero(l == 0);
         } else if (regType == HL) {
-            auto newValue = Bitwise::swapNibbles(memoryRead(getHL()));
+            auto newValue = bits::swapNibbles(memoryRead(getHL()));
             memoryWrite(getHL(), newValue);
             setZero(newValue == 0);
         } else {
-            Logger::err("{}", "Invalid register provided for SWAP opcode. Must be A, B, C, D, E, H, L or HL");
+            log::err("{}", "Invalid register provided for SWAP opcode. Must be A, B, C, D, E, H, L or HL");
             return;
         }
 
@@ -426,7 +426,7 @@ private:
             l = RL(l);
             setZero(l == 0);
         } else {
-            Logger::err("{}", "Invalid register provided for RL opcode. Must be A, B, C, D, E, H, or L");
+            log::err("{}", "Invalid register provided for RL opcode. Must be A, B, C, D, E, H, or L");
             return;
         }
 
@@ -470,7 +470,7 @@ private:
             l = RLC(l);
             setZero(l == 0);
         } else {
-            Logger::err("{}", "Invalid register provided for RLC opcode. Must be A, B, C, D, E, H, or L");
+            log::err("{}", "Invalid register provided for RLC opcode. Must be A, B, C, D, E, H, or L");
             return;
         }
 
@@ -514,7 +514,7 @@ private:
             l = RR(l);
             setZero(l == 0);
         } else {
-            Logger::err("{}", "Invalid register provided for RR opcode. Must be A, B, C, D, E, H, or L");
+            log::err("{}", "Invalid register provided for RR opcode. Must be A, B, C, D, E, H, or L");
             return;
         }
 
@@ -558,7 +558,7 @@ private:
             l = RRC(l);
             setZero(l == 0);
         } else {
-            Logger::err("{}", "Invalid register provided for RRC opcode. Must be A, B, C, D, E, H, or L");
+            log::err("{}", "Invalid register provided for RRC opcode. Must be A, B, C, D, E, H, or L");
             return;
         }
 
@@ -578,41 +578,41 @@ private:
         using enum RegisterType;
 
         if constexpr (regType == A) {
-            setCarry(Bitwise::getBitInByte(a, 7));
+            setCarry(bits::getBitInByte(a, 7));
             a <<= 1;
             setZero(a == 0);
         } else if (regType == B) {
-            setCarry(Bitwise::getBitInByte(b, 7));
+            setCarry(bits::getBitInByte(b, 7));
             b <<= 1;
             setZero(b == 0);
         } else if (regType == C) {
-            setCarry(Bitwise::getBitInByte(c, 7));
+            setCarry(bits::getBitInByte(c, 7));
             c <<= 1;
             setZero(c == 0);
         } else if (regType == D) {
-            setCarry(Bitwise::getBitInByte(d, 7));
+            setCarry(bits::getBitInByte(d, 7));
             d <<= 1;
             setZero(d == 0);
         } else if (regType == E) {
-            setCarry(Bitwise::getBitInByte(e, 7));
+            setCarry(bits::getBitInByte(e, 7));
             e <<= 1;
             setZero(e == 0);
         } else if (regType == H) {
-            setCarry(Bitwise::getBitInByte(h, 7));
+            setCarry(bits::getBitInByte(h, 7));
             h <<= 1;
             setZero(h == 0);
         } else if (regType == L) {
-            setCarry(Bitwise::getBitInByte(l, 7));
+            setCarry(bits::getBitInByte(l, 7));
             l <<= 1;
             setZero(l == 0);
         } else if (regType == HL) {
             auto newVal = memoryRead(getHL());
-            setCarry(Bitwise::getBitInByte(newVal, 7));
+            setCarry(bits::getBitInByte(newVal, 7));
             newVal <<= 1;
             memoryWrite(getHL(), newVal);
             setZero(newVal == 0);
         } else {
-            Logger::err("{}", "Invalid register provided for SLA opcode. Must be A, B, C, D, E, H, L or HL");
+            log::err("{}", "Invalid register provided for SLA opcode. Must be A, B, C, D, E, H, L or HL");
             return;
         }
 
@@ -626,49 +626,49 @@ private:
         using enum RegisterType;
 
         if constexpr (regType == A) {
-            setCarry(Bitwise::getBitInByte(a, 0));
-            uint8_t bit7 = Bitwise::getBitInByte(a, 7);
+            setCarry(bits::getBitInByte(a, 0));
+            uint8_t bit7 = bits::getBitInByte(a, 7);
             a = (a >> 1) | (bit7 << 7);
             setZero(a == 0);
         } else if (regType == B) {
-            setCarry(Bitwise::getBitInByte(b, 0));
-            uint8_t bit7 = Bitwise::getBitInByte(b, 7);
+            setCarry(bits::getBitInByte(b, 0));
+            uint8_t bit7 = bits::getBitInByte(b, 7);
             b = (b >> 1) | (bit7 << 7);
             setZero(b == 0);
         } else if (regType == C) {
-            setCarry(Bitwise::getBitInByte(c, 0));
-            uint8_t bit7 = Bitwise::getBitInByte(c, 7);
+            setCarry(bits::getBitInByte(c, 0));
+            uint8_t bit7 = bits::getBitInByte(c, 7);
             c = (c >> 1) | (bit7 << 7);
             setZero(c == 0);
         } else if (regType == D) {
-            setCarry(Bitwise::getBitInByte(d, 0));
-            uint8_t bit7 = Bitwise::getBitInByte(d, 7);
+            setCarry(bits::getBitInByte(d, 0));
+            uint8_t bit7 = bits::getBitInByte(d, 7);
             d = (d >> 1) | (bit7 << 7);
             setZero(d == 0);
         } else if (regType == E) {
-            setCarry(Bitwise::getBitInByte(e, 0));
-            uint8_t bit7 = Bitwise::getBitInByte(e, 7);
+            setCarry(bits::getBitInByte(e, 0));
+            uint8_t bit7 = bits::getBitInByte(e, 7);
             e = (e >> 1) | (bit7 << 7);
             setZero(e == 0);
         } else if (regType == H) {
-            setCarry(Bitwise::getBitInByte(h, 0));
-            uint8_t bit7 = Bitwise::getBitInByte(h, 7);
+            setCarry(bits::getBitInByte(h, 0));
+            uint8_t bit7 = bits::getBitInByte(h, 7);
             h = (h >> 1) | (bit7 << 7);
             setZero(h == 0);
         } else if (regType == L) {
-            setCarry(Bitwise::getBitInByte(l, 0));
-            uint8_t bit7 = Bitwise::getBitInByte(l, 7);
+            setCarry(bits::getBitInByte(l, 0));
+            uint8_t bit7 = bits::getBitInByte(l, 7);
             l = (l >> 1) | (bit7 << 7);
             setZero(l == 0);
         } else if (regType == HL) {
             auto newVal = memoryRead(getHL());
-            setCarry(Bitwise::getBitInByte(newVal, 0));
-            uint8_t bit7 = Bitwise::getBitInByte(newVal, 7);
+            setCarry(bits::getBitInByte(newVal, 0));
+            uint8_t bit7 = bits::getBitInByte(newVal, 7);
             newVal = (newVal >> 1) | (bit7 << 7);
             memoryWrite(getHL(), newVal);
             setZero(newVal == 0);
         } else {
-            Logger::err("{}", "Invalid register provided for SRA opcode. Must be A, B, C, D, E, H, L or HL");
+            log::err("{}", "Invalid register provided for SRA opcode. Must be A, B, C, D, E, H, L or HL");
             return;
         }
 
@@ -682,41 +682,41 @@ private:
         using enum RegisterType;
 
         if constexpr (regType == A) {
-            setCarry(Bitwise::getBitInByte(a, 0));
+            setCarry(bits::getBitInByte(a, 0));
             a >>= 1;
             setZero(a == 0);
         } else if (regType == B) {
-            setCarry(Bitwise::getBitInByte(b, 0));
+            setCarry(bits::getBitInByte(b, 0));
             b >>= 1;
             setZero(b == 0);
         } else if (regType == C) {
-            setCarry(Bitwise::getBitInByte(c, 0));
+            setCarry(bits::getBitInByte(c, 0));
             c >>= 1;
             setZero(c == 0);
         } else if (regType == D) {
-            setCarry(Bitwise::getBitInByte(d, 0));
+            setCarry(bits::getBitInByte(d, 0));
             d >>= 1;
             setZero(d == 0);
         } else if (regType == E) {
-            setCarry(Bitwise::getBitInByte(e, 0));
+            setCarry(bits::getBitInByte(e, 0));
             e >>= 1;
             setZero(e == 0);
         } else if (regType == H) {
-            setCarry(Bitwise::getBitInByte(h, 0));
+            setCarry(bits::getBitInByte(h, 0));
             h >>= 1;
             setZero(h == 0);
         } else if (regType == L) {
-            setCarry(Bitwise::getBitInByte(l, 0));
+            setCarry(bits::getBitInByte(l, 0));
             l >>= 1;
             setZero(l == 0);
         } else if (regType == HL) {
             auto newVal = memoryRead(getHL());
-            setCarry(Bitwise::getBitInByte(newVal, 0));
+            setCarry(bits::getBitInByte(newVal, 0));
             newVal >>= 1;
             memoryWrite(getHL(), newVal);
             setZero(newVal == 0);
         } else {
-            Logger::err("{}", "Invalid register provided for SRL opcode. Must be A, B, C, D, E, H, L or HL");
+            log::err("{}", "Invalid register provided for SRL opcode. Must be A, B, C, D, E, H, L or HL");
             return;
         }
 
@@ -748,7 +748,7 @@ private:
         } else if (regType == L) {
             l = value;
         } else {
-            Logger::err("{}", "Invalid register provided for LD_r8 opcode. Must be A, B, C, D, E, H or L");
+            log::err("{}", "Invalid register provided for LD_r8 opcode. Must be A, B, C, D, E, H or L");
         }
     }
 
@@ -766,7 +766,7 @@ private:
         } else if (regType == HL) {
             setHL(value);
         } else {
-            Logger::err("{}", "Invalid register provided for LD_r16 opcode. Must be AF, BC, DE or HL");
+            log::err("{}", "Invalid register provided for LD_r16 opcode. Must be AF, BC, DE or HL");
         }
     }
 
@@ -863,7 +863,7 @@ private:
         } else if (regType == HL) {
             setHL(popStack16());
         } else {
-            Logger::err("{}" , "Unsupported register for POP operation. Must be AF, BC, DE or HL");
+            log::err("{}" , "Unsupported register for POP operation. Must be AF, BC, DE or HL");
         }
     }
 
@@ -881,7 +881,7 @@ private:
         } else if (regType == HL) {
             pushToStack16(getHL());
         } else {
-            Logger::err("{}" , "Unsupported register for PUSH operation. Must be AF, BC, DE or HL");
+            log::err("{}" , "Unsupported register for PUSH operation. Must be AF, BC, DE or HL");
         }
     }
 

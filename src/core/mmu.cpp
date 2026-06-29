@@ -1,6 +1,6 @@
 #include "mmu.h"
 
-#include <common/logger.h>
+#include "common/log.h"
 
 #include "cartridge.h"
 #include "gameboy.h"
@@ -22,7 +22,7 @@ uint8_t RealMMU::memoryRead(uint16_t address) {
     } else if (address >= 0xFF45 && address <= 0xFFFF) {
         return m_memory[address];
     } else {
-        Logger::err("{} {:X}", "Invalid address for memory read: ", address);
+        log::err("{} {:X}", "Invalid address for memory read: ", address);
         return 0x00;
     }
 }
@@ -37,7 +37,7 @@ void RealMMU::memoryWrite(uint16_t address, uint8_t value) {
     } else if (address >= 0xFE00 && address <= 0xFFFF) {
         m_memory[address] = value;
     } else {
-        Logger::err("{} {:X}", "Invalid address for memory write: ", address);
+        log::err("{} {:X}", "Invalid address for memory write: ", address);
     }
 }
 
@@ -45,7 +45,7 @@ uint8_t MockMMU::memoryRead(uint16_t address) {
     if (address >= 0x0000 && address <= 0xFFFF) {
         return m_memory[address];
     } else {
-        Logger::err("{} {:X}", "Invalid address for memory read: ", address);
+        log::err("{} {:X}", "Invalid address for memory read: ", address);
         return 0x00;
     }
 }
@@ -54,6 +54,6 @@ void MockMMU::memoryWrite(uint16_t address, uint8_t value) {
     if (address >= 0x0000 && address <= 0xFFFF) {
         m_memory[address] = value;
     } else {
-        Logger::err("{} {:X}", "Invalid address for memory write: ", address);
+        log::err("{} {:X}", "Invalid address for memory write: ", address);
     }
 }

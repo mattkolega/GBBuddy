@@ -5,7 +5,8 @@
 
 #include <fmt/base.h>
 
-#include <common/bitwise.h>
+#include "common/bits.h"
+#include "common/log.h"
 
 #include "gameboy.h"
 
@@ -93,7 +94,7 @@ void CPU::memoryWrite(uint16_t address, uint8_t value) {
 }
 
 uint16_t CPU::getAF() {
-    return Bitwise::concatBytes(f, a);
+    return bits::concatBytes(f, a);
 }
 
 void CPU::setAF(uint16_t value) {
@@ -102,7 +103,7 @@ void CPU::setAF(uint16_t value) {
 }
 
 uint16_t CPU::getBC() {
-    return Bitwise::concatBytes(c, b);
+    return bits::concatBytes(c, b);
 }
 
 void CPU::setBC(uint16_t value) {
@@ -111,7 +112,7 @@ void CPU::setBC(uint16_t value) {
 }
 
 uint16_t CPU::getDE() {
-    return Bitwise::concatBytes(e, d);
+    return bits::concatBytes(e, d);
 }
 
 void CPU::setDE(uint16_t value) {
@@ -120,7 +121,7 @@ void CPU::setDE(uint16_t value) {
 }
 
 uint16_t CPU::getHL() {
-    return Bitwise::concatBytes(l, h);
+    return bits::concatBytes(l, h);
 }
 
 void CPU::setHL(uint16_t value) {
@@ -129,35 +130,35 @@ void CPU::setHL(uint16_t value) {
 }
 
 uint8_t CPU::getZero() {
-    return Bitwise::getBitInByte(f, 7);
+    return bits::getBitInByte(f, 7);
 }
 
 void CPU::setZero(uint8_t value) {
-    f = Bitwise::modifyBitInByte(f, 7, value);
+    f = bits::modifyBitInByte(f, 7, value);
 }
 
 uint8_t CPU::getSubtract() {
-    return Bitwise::getBitInByte(f, 6);
+    return bits::getBitInByte(f, 6);
 }
 
 void CPU::setSubtract(uint8_t value) {
-    f = Bitwise::modifyBitInByte(f, 6, value);
+    f = bits::modifyBitInByte(f, 6, value);
 }
 
 uint8_t CPU::getHalfCarry() {
-    return Bitwise::getBitInByte(f, 5);
+    return bits::getBitInByte(f, 5);
 }
 
 void CPU::setHalfCarry(uint8_t value) {
-    f = Bitwise::modifyBitInByte(f, 5, value);
+    f = bits::modifyBitInByte(f, 5, value);
 }
 
 uint8_t CPU::getCarry() {
-    return Bitwise::getBitInByte(f, 4);
+    return bits::getBitInByte(f, 4);
 }
 
 void CPU::setCarry(uint8_t value) {
-    f = Bitwise::modifyBitInByte(f, 4, value);
+    f = bits::modifyBitInByte(f, 4, value);
 }
 
 void CPU::pushToStack16(uint16_t value) {
@@ -172,7 +173,7 @@ uint16_t CPU::popStack16() {
     sp++;
     auto hi = memoryRead(sp);
     sp++;
-    return Bitwise::concatBytes(lo, hi);
+    return bits::concatBytes(lo, hi);
 }
 
 /**
@@ -186,8 +187,8 @@ void CPU::ADC(uint8_t value) {
     // Set flags
     setZero(a == 0);
     setSubtract(0);
-    setHalfCarry(Bitwise::checkHalfCarryAdd(value, getCarry()));
-    setHalfCarry(getHalfCarry() | Bitwise::checkHalfCarryAdd(originalValue, (value + getCarry())));
+    setHalfCarry(bits::checkHalfCarryAdd(value, getCarry()));
+    setHalfCarry(getHalfCarry() | bits::checkHalfCarryAdd(originalValue, (value + getCarry())));
     setCarry((originalValue + value + getCarry()) > 0xFF);
 }
 
@@ -198,7 +199,7 @@ void CPU::ADD(uint8_t value) {
     // Set flags
     setZero(a == 0);
     setSubtract(0);
-    setHalfCarry(Bitwise::checkHalfCarryAdd(originalValue, value));
+    setHalfCarry(bits::checkHalfCarryAdd(originalValue, value));
     setCarry((originalValue + value) > 0xFF);
 }
 
@@ -218,7 +219,7 @@ void CPU::CP(uint8_t value) {
     // Set flags
     setZero(subResult == 0);
     setSubtract(1);
-    setHalfCarry(Bitwise::checkHalfCarrySub(a, value));
+    setHalfCarry(bits::checkHalfCarrySub(a, value));
     setCarry((a - value) < 0);
 }
 
@@ -239,8 +240,8 @@ void CPU::SBC(uint8_t value) {
     // Set flags
     setZero(a == 0);
     setSubtract(1);
-    setHalfCarry(Bitwise::checkHalfCarrySub(originalValue, value));
-    setHalfCarry(getHalfCarry() | Bitwise::checkHalfCarrySub(originalValue - value, getCarry()));
+    setHalfCarry(bits::checkHalfCarrySub(originalValue, value));
+    setHalfCarry(getHalfCarry() | bits::checkHalfCarrySub(originalValue - value, getCarry()));
     setCarry((originalValue - value - getCarry()) < 0);
 }
 
@@ -251,7 +252,7 @@ void CPU::SUB(uint8_t value) {
     // Set flags
     setZero(a == 0);
     setSubtract(1);
-    setHalfCarry(Bitwise::checkHalfCarrySub(originalValue, value));
+    setHalfCarry(bits::checkHalfCarrySub(originalValue, value));
     setCarry((originalValue - value) < 0);
 }
 
@@ -276,7 +277,7 @@ void CPU::ADD(uint16_t value) {
 
     // Set flags
     setSubtract(0);
-    setHalfCarry(Bitwise::checkHalfCarryAdd(originalValue, value));
+    setHalfCarry(bits::checkHalfCarryAdd(originalValue, value));
     setCarry((originalValue + value) > 0xFFFF);
 }
 
@@ -285,7 +286,7 @@ Bit Operation Instructions
  */
 
 void CPU::BIT(uint8_t bitPos, uint8_t value) {
-    setZero(Bitwise::getBitInByte(value, bitPos) == 0);
+    setZero(bits::getBitInByte(value, bitPos) == 0);
     setSubtract(0);
     setHalfCarry(1);
 }
@@ -296,9 +297,9 @@ Bit Shift Instructions
 
 uint8_t CPU::RL(uint8_t value) {
     auto carryValue = getCarry();  // Get current carry flag value
-    setCarry(Bitwise::getBitInByte(value, 7));  // Set carry flag to leftmost bit
+    setCarry(bits::getBitInByte(value, 7));  // Set carry flag to leftmost bit
     uint8_t newValue = std::rotl(value, 1);
-    return Bitwise::modifyBitInByte(newValue, 0, carryValue);
+    return bits::modifyBitInByte(newValue, 0, carryValue);
 }
 
 void CPU::RL_HL() {
@@ -321,7 +322,7 @@ void CPU::RLA() {
 }
 
 uint8_t CPU::RLC(uint8_t value) {
-    setCarry(Bitwise::getBitInByte(value, 7));  // Set carry flag to leftmost bit
+    setCarry(bits::getBitInByte(value, 7));  // Set carry flag to leftmost bit
     return std::rotl(value, 1);
 }
 
@@ -346,9 +347,9 @@ void CPU::RLCA() {
 
 uint8_t CPU::RR(uint8_t value) {
     auto carryValue = getCarry();  // Get current carry flag value
-    setCarry(Bitwise::getBitInByte(value, 0));  // Set carry flag to right-most bit
+    setCarry(bits::getBitInByte(value, 0));  // Set carry flag to right-most bit
     uint8_t newValue = std::rotr(value, 1);
-    return Bitwise::modifyBitInByte(newValue, 7, carryValue);
+    return bits::modifyBitInByte(newValue, 7, carryValue);
 }
 
 void CPU::RR_HL() {
@@ -371,7 +372,7 @@ void CPU::RRA() {
 }
 
 uint8_t CPU::RRC(uint8_t value) {
-    setCarry(Bitwise::getBitInByte(value, 0));  // Set carry flag to right-most bit
+    setCarry(bits::getBitInByte(value, 0));  // Set carry flag to right-most bit
     return std::rotr(value, 1);
 }
 
@@ -496,7 +497,7 @@ void CPU::ADD_HL_SP() {
 
     // Set flags
     setSubtract(0);
-    setHalfCarry(Bitwise::checkHalfCarryAdd(originalValue, sp));
+    setHalfCarry(bits::checkHalfCarryAdd(originalValue, sp));
     setCarry((originalValue + sp) > 0xFFFF);
 }
 
@@ -508,7 +509,7 @@ void CPU::ADD_SP_e8(int8_t value) {
     // Set flags
     setZero(0);
     setSubtract(0);
-    setHalfCarry(Bitwise::checkHalfCarryAdd(static_cast<uint8_t>(originalValue), value));
+    setHalfCarry(bits::checkHalfCarryAdd(static_cast<uint8_t>(originalValue), value));
     setCarry(((originalValue & 0xFF) + static_cast<uint8_t>(value)) > 0xFF);
 }
 
@@ -527,7 +528,7 @@ void CPU::LD_HL_SP(int8_t value) {
 
     setZero(0);
     setSubtract(0);
-    setHalfCarry(Bitwise::checkHalfCarryAdd(static_cast<uint8_t>(sp), value));
+    setHalfCarry(bits::checkHalfCarryAdd(static_cast<uint8_t>(sp), value));
     setCarry(((sp & 0xFF) + static_cast<uint8_t>(value)) > 0xFF);
 }
 
@@ -600,7 +601,7 @@ void CPU::STOP() {
 
 // Reports an invalid opcode and returns 0 to be used as number of cycles
 static size_t logInvalidOpcode(uint16_t opcode) {
-    Logger::err("{} {:X}", "Invalid opcode: ", opcode);
+    log::err("{} {:X}", "Invalid opcode: ", opcode);
     return 0;
 }
 
@@ -608,15 +609,15 @@ size_t CPU::opDecode() {
     auto opcode = memoryRead(pc);
     pc += 1;
 
-    switch (Bitwise::getFirstNibble(opcode)) {
+    switch (bits::getFirstNibble(opcode)) {
         case 0x0: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     NOP();
                     return 1;
                 }
                 case 0x1: {
-                    auto value = Bitwise::concatBytes(memoryRead(pc), memoryRead(pc+1));
+                    auto value = bits::concatBytes(memoryRead(pc), memoryRead(pc+1));
                     pc += 2;
                     LD_r16<RegisterType::BC>(value);
                     return 3;
@@ -647,7 +648,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 case 0x8: {
-                    auto address = Bitwise::concatBytes(memoryRead(pc), memoryRead(pc+1));
+                    auto address = bits::concatBytes(memoryRead(pc), memoryRead(pc+1));
                     pc += 2;
                     LD_n16_SP(address);
                     return 5;
@@ -686,13 +687,13 @@ size_t CPU::opDecode() {
             }
         }
         case 0x1: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     STOP();
                     return 2;
                 }
                 case 0x1: {
-                    auto value = Bitwise::concatBytes(memoryRead(pc), memoryRead(pc+1));
+                    auto value = bits::concatBytes(memoryRead(pc), memoryRead(pc+1));
                     pc += 2;
                     LD_r16<RegisterType::DE>(value);
                     return 3;
@@ -761,7 +762,7 @@ size_t CPU::opDecode() {
             }
         }
         case 0x2: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     if (getZero() == 0) {
                         JR(memoryRead(pc));
@@ -773,7 +774,7 @@ size_t CPU::opDecode() {
                     }
                 }
                 case 0x1: {
-                    auto value = Bitwise::concatBytes(memoryRead(pc), memoryRead(pc+1));
+                    auto value = bits::concatBytes(memoryRead(pc), memoryRead(pc+1));
                     pc += 2;
                     LD_r16<RegisterType::HL>(value);
                     return 3;
@@ -847,7 +848,7 @@ size_t CPU::opDecode() {
             }
         }
         case 0x3: {
-           switch (Bitwise::getSecondNibble(opcode)) {
+           switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     if (getCarry() == 0) {
                         JR(memoryRead(pc));
@@ -859,7 +860,7 @@ size_t CPU::opDecode() {
                     }
                 }
                 case 0x1: {
-                    auto value = Bitwise::concatBytes(memoryRead(pc), memoryRead(pc+1));
+                    auto value = bits::concatBytes(memoryRead(pc), memoryRead(pc+1));
                     pc += 2;
                     LD_SP_n16(value);
                     return 3;
@@ -933,7 +934,7 @@ size_t CPU::opDecode() {
             }
         }
         case 0x4: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     LD_r8<RegisterType::B>(b);
                     return 1;
@@ -1003,7 +1004,7 @@ size_t CPU::opDecode() {
             }
         }
         case 0x5: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     LD_r8<RegisterType::D>(b);
                     return 1;
@@ -1073,7 +1074,7 @@ size_t CPU::opDecode() {
             }
         }
         case 0x6: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     LD_r8<RegisterType::H>(b);
                     return 1;
@@ -1143,7 +1144,7 @@ size_t CPU::opDecode() {
             }
         }
         case 0x7: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     LD_HL(b);
                     return 2;
@@ -1213,7 +1214,7 @@ size_t CPU::opDecode() {
             }
         }
         case 0x8: {
-           switch (Bitwise::getSecondNibble(opcode)) {
+           switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     ADD(b);
                     return 1;
@@ -1283,7 +1284,7 @@ size_t CPU::opDecode() {
             }
         }
         case 0x9: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     SUB(b);
                     return 1;
@@ -1353,7 +1354,7 @@ size_t CPU::opDecode() {
             }
         }
         case 0xA: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     AND(b);
                     return 1;
@@ -1423,7 +1424,7 @@ size_t CPU::opDecode() {
             }
         }
         case 0xB: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     OR(b);
                     return 1;
@@ -1493,7 +1494,7 @@ size_t CPU::opDecode() {
             }
         }
         case 0xC: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     if (getZero() == 0) {
                         RET();
@@ -1508,7 +1509,7 @@ size_t CPU::opDecode() {
                 }
                 case 0x2: {
                     if (getZero() == 0) {
-                        auto address = Bitwise::concatBytes(memoryRead(pc), memoryRead(pc+1));
+                        auto address = bits::concatBytes(memoryRead(pc), memoryRead(pc+1));
                         pc += 2;
                         JP(address);
                         return 4;
@@ -1518,14 +1519,14 @@ size_t CPU::opDecode() {
                     }
                 }
                 case 0x3: {
-                    auto address = Bitwise::concatBytes(memoryRead(pc), memoryRead(pc+1));
+                    auto address = bits::concatBytes(memoryRead(pc), memoryRead(pc+1));
                     pc += 2;
                     JP(address);
                     return 4;
                 }
                 case 0x4: {
                     if (getZero() == 0) {
-                        auto address = Bitwise::concatBytes(memoryRead(pc), memoryRead(pc+1));
+                        auto address = bits::concatBytes(memoryRead(pc), memoryRead(pc+1));
                         pc += 2;
                         CALL(address);
                         return 6;
@@ -1561,7 +1562,7 @@ size_t CPU::opDecode() {
                 }
                 case 0xA: {
                     if (getZero() == 1) {
-                        auto address = Bitwise::concatBytes(memoryRead(pc), memoryRead(pc+1));
+                        auto address = bits::concatBytes(memoryRead(pc), memoryRead(pc+1));
                         pc += 2;
                         JP(address);
                         return 4;
@@ -1575,7 +1576,7 @@ size_t CPU::opDecode() {
                 }
                 case 0xC: {
                     if (getZero() == 1) {
-                        auto address = Bitwise::concatBytes(memoryRead(pc), memoryRead(pc+1));
+                        auto address = bits::concatBytes(memoryRead(pc), memoryRead(pc+1));
                         pc += 2;
                         CALL(address);
                         return 6;
@@ -1585,7 +1586,7 @@ size_t CPU::opDecode() {
                     }
                 }
                 case 0xD: {
-                    auto address = Bitwise::concatBytes(memoryRead(pc), memoryRead(pc+1));
+                    auto address = bits::concatBytes(memoryRead(pc), memoryRead(pc+1));
                     pc += 2;
                     CALL(address);
                     return 6;
@@ -1604,7 +1605,7 @@ size_t CPU::opDecode() {
             }
         }
         case 0xD: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     if (getCarry() == 0) {
                         RET();
@@ -1619,7 +1620,7 @@ size_t CPU::opDecode() {
                 }
                 case 0x2: {
                     if (getCarry() == 0) {
-                        auto address = Bitwise::concatBytes(memoryRead(pc), memoryRead(pc+1));
+                        auto address = bits::concatBytes(memoryRead(pc), memoryRead(pc+1));
                         pc += 2;
                         JP(address);
                         return 4;
@@ -1630,7 +1631,7 @@ size_t CPU::opDecode() {
                 }
                 case 0x4: {
                     if (getCarry() == 0) {
-                        auto address = Bitwise::concatBytes(memoryRead(pc), memoryRead(pc+1));
+                        auto address = bits::concatBytes(memoryRead(pc), memoryRead(pc+1));
                         pc += 2;
                         CALL(address);
                         return 6;
@@ -1666,7 +1667,7 @@ size_t CPU::opDecode() {
                 }
                 case 0xA: {
                     if (getCarry() == 1) {
-                        auto address = Bitwise::concatBytes(memoryRead(pc), memoryRead(pc+1));
+                        auto address = bits::concatBytes(memoryRead(pc), memoryRead(pc+1));
                         pc += 2;
                         JP(address);
                         return 4;
@@ -1677,7 +1678,7 @@ size_t CPU::opDecode() {
                 }
                 case 0xC: {
                     if (getCarry() == 1) {
-                        auto address = Bitwise::concatBytes(memoryRead(pc), memoryRead(pc+1));
+                        auto address = bits::concatBytes(memoryRead(pc), memoryRead(pc+1));
                         pc += 2;
                         CALL(address);
                         return 6;
@@ -1700,7 +1701,7 @@ size_t CPU::opDecode() {
             }
         }
         case 0xE: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     LDH_n16_A(memoryRead(pc));
                     pc++;
@@ -1737,7 +1738,7 @@ size_t CPU::opDecode() {
                     return 1;
                 }
                 case 0xA: {
-                    auto address = Bitwise::concatBytes(memoryRead(pc), memoryRead(pc+1));
+                    auto address = bits::concatBytes(memoryRead(pc), memoryRead(pc+1));
                     pc += 2;
                     LD_n16_A(address);
                     return 4;
@@ -1756,7 +1757,7 @@ size_t CPU::opDecode() {
             }
         }
         case 0xF: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     LDH_A_n16(memoryRead(pc));
                     pc++;
@@ -1797,7 +1798,7 @@ size_t CPU::opDecode() {
                     return 2;
                 }
                 case 0xA: {
-                    auto address = Bitwise::concatBytes(memoryRead(pc), memoryRead(pc+1));
+                    auto address = bits::concatBytes(memoryRead(pc), memoryRead(pc+1));
                     pc += 2;
                     LD_A_n16(address);
                     return 4;
@@ -1828,9 +1829,9 @@ size_t CPU::opDecodeCB() {
     auto opcode = memoryRead(pc);
     pc += 1;
 
-    switch (Bitwise::getFirstNibble(opcode)) {
+    switch (bits::getFirstNibble(opcode)) {
         case 0x0: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     RLC_r8<RegisterType::B>();
                     return 2;
@@ -1896,11 +1897,11 @@ size_t CPU::opDecodeCB() {
                     return 2;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(bits::concatBytes(opcode, 0xCB));
             }
         }
         case 0x1: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     RL_r8<RegisterType::B>();
                     return 2;
@@ -1966,11 +1967,11 @@ size_t CPU::opDecodeCB() {
                     return 2;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(bits::concatBytes(opcode, 0xCB));
             }
         }
         case 0x2: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     SLA<RegisterType::B>();
                     return 2;
@@ -2036,11 +2037,11 @@ size_t CPU::opDecodeCB() {
                     return 2;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(bits::concatBytes(opcode, 0xCB));
             }
         }
         case 0x3: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     SWAP<RegisterType::B>();
                     return 2;
@@ -2106,11 +2107,11 @@ size_t CPU::opDecodeCB() {
                     return 2;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(bits::concatBytes(opcode, 0xCB));
             }
         }
         case 0x4: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     BIT(0, b);
                     return 2;
@@ -2176,11 +2177,11 @@ size_t CPU::opDecodeCB() {
                     return 2;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(bits::concatBytes(opcode, 0xCB));
             }
         }
         case 0x5: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     BIT(2, b);
                     return 2;
@@ -2246,11 +2247,11 @@ size_t CPU::opDecodeCB() {
                     return 2;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(bits::concatBytes(opcode, 0xCB));
             }
         }
         case 0x6: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     BIT(4, b);
                     return 2;
@@ -2316,11 +2317,11 @@ size_t CPU::opDecodeCB() {
                     return 2;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(bits::concatBytes(opcode, 0xCB));
             }
         }
         case 0x7: {
-           switch (Bitwise::getSecondNibble(opcode)) {
+           switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     BIT(6, b);
                     return 2;
@@ -2386,11 +2387,11 @@ size_t CPU::opDecodeCB() {
                     return 2;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(bits::concatBytes(opcode, 0xCB));
             }
         }
         case 0x8: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     RES<RegisterType::B>(0);
                     return 2;
@@ -2456,11 +2457,11 @@ size_t CPU::opDecodeCB() {
                     return 2;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(bits::concatBytes(opcode, 0xCB));
             }
         }
         case 0x9: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     RES<RegisterType::B>(2);
                     return 2;
@@ -2526,11 +2527,11 @@ size_t CPU::opDecodeCB() {
                     return 2;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(bits::concatBytes(opcode, 0xCB));
             }
         }
         case 0xA: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     RES<RegisterType::B>(4);
                     return 2;
@@ -2596,11 +2597,11 @@ size_t CPU::opDecodeCB() {
                     return 2;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(bits::concatBytes(opcode, 0xCB));
             }
         }
         case 0xB: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     RES<RegisterType::B>(6);
                     return 2;
@@ -2666,11 +2667,11 @@ size_t CPU::opDecodeCB() {
                     return 2;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(bits::concatBytes(opcode, 0xCB));
             }
         }
         case 0xC: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     SET<RegisterType::B>(0);
                     return 2;
@@ -2736,11 +2737,11 @@ size_t CPU::opDecodeCB() {
                     return 2;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(bits::concatBytes(opcode, 0xCB));
             }
         }
         case 0xD: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     SET<RegisterType::B>(2);
                     return 2;
@@ -2806,11 +2807,11 @@ size_t CPU::opDecodeCB() {
                     return 2;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(bits::concatBytes(opcode, 0xCB));
             }
         }
         case 0xE: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     SET<RegisterType::B>(4);
                     return 2;
@@ -2876,11 +2877,11 @@ size_t CPU::opDecodeCB() {
                     return 2;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(bits::concatBytes(opcode, 0xCB));
             }
         }
         case 0xF: {
-            switch (Bitwise::getSecondNibble(opcode)) {
+            switch (bits::getSecondNibble(opcode)) {
                 case 0x0: {
                     SET<RegisterType::B>(6);
                     return 2;
@@ -2946,10 +2947,10 @@ size_t CPU::opDecodeCB() {
                     return 2;
                 }
                 default:
-                    return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+                    return logInvalidOpcode(bits::concatBytes(opcode, 0xCB));
             }
         }
         default:
-            return logInvalidOpcode(Bitwise::concatBytes(opcode, 0xCB));
+            return logInvalidOpcode(bits::concatBytes(opcode, 0xCB));
     }
 }
