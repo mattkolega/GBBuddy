@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28...3.31)
+cmake_minimum_required(VERSION 3.31)
 
 project(
     GBBuddy
@@ -11,12 +11,9 @@ set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-# Export compile_commands.json so intellisense works properly
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+include(cmake/ProjectConfig.cmake)
 
-# Add CMake modules
 include(FetchContent)
-
 # Get fmt library for formatting console output
 FetchContent_Declare(
     fmt
@@ -36,6 +33,10 @@ FetchContent_Declare(
     GIT_TAG master
     GIT_SHALLOW 1
 )
+
+# Stop SDL from compiling tests
+set(SDL_TEST_LIBRARY OFF CACHE BOOL "" FORCE)
+set(SDL_TESTS OFF CACHE BOOL "" FORCE)
 
 FetchContent_MakeAvailable(fmt SDL3 tinyfiledialogs)
 
