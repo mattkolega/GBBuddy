@@ -9,21 +9,22 @@
 #include <catch2/catch_test_macros.hpp>
 #include <glaze/glaze.hpp>
 
-#include <core/gameboy.h>
-#include <core/cpu.h>
+#include "common/types.h"
+#include "core/gameboy.h"
+#include "core/cpu.h"
 
 namespace fs = std::filesystem;
 
 typedef std::tuple<int, int, std::string> Cycle;
 
 struct SM83State {
-    uint8_t a, b, c, d, e, f, h, l {};
-    uint16_t pc {};
-    uint16_t sp {};
-    uint8_t ime {};
-    uint8_t ie {};
-    uint8_t ei {};
-    std::vector<std::tuple<uint16_t, uint8_t>> ram {};
+    u8 a {}, b {}, c {}, d {}, e {}, f {}, h {}, l {};
+    u16 pc {};
+    u16 sp {};
+    u8 ime {};
+    u8 ie {};
+    u8 ei {};
+    std::vector<std::tuple<u16, u8>> ram {};
 };
 
 struct SingleTest {
@@ -72,7 +73,7 @@ void performTest(GameBoy *gb, const SingleTest &test) {
     std::ostringstream actualMem {};
     std::ostringstream expectedMem {};
 
-    bool ramMatch = true;
+    bool ramMatch {true};
     for (const auto &memVal : test.final.ram) {
         const auto value = gb->mmu->memoryRead(std::get<0>(memVal));
 

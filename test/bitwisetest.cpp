@@ -1,10 +1,11 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include "common/bits.h"
+#include "common/types.h"
 
 TEST_CASE("Half carry for addition is properly calculated") {
     SECTION("8-bit addition") {
-        uint8_t a, b;
+        u8 a {}, b {};
 
         a = 0xF, b = 0xF;
         REQUIRE(true == bits::checkHalfCarryAdd(a, b));
@@ -17,7 +18,7 @@ TEST_CASE("Half carry for addition is properly calculated") {
     }
 
     SECTION("16-bit addition") {
-        uint16_t a, b;
+        u16 a {}, b {};
 
         a = 0xFFF, b = 0xFFF;
         REQUIRE(true == bits::checkHalfCarryAdd(a, b));
@@ -32,7 +33,7 @@ TEST_CASE("Half carry for addition is properly calculated") {
 
 TEST_CASE("Half carry for subtraction is properly calculated") {
     SECTION("8-bit subtraction") {
-        uint8_t a, b;
+        u8 a {}, b {};
 
         a = 0xF, b = 0xF;
         REQUIRE(false == bits::checkHalfCarrySub(a, b));
@@ -45,7 +46,7 @@ TEST_CASE("Half carry for subtraction is properly calculated") {
     }
 
     SECTION("16-bit subtraction") {
-        uint16_t a, b;
+        u16 a {}, b {};
 
         a = 0xFFF, b = 0xFFF;
         REQUIRE(false == bits::checkHalfCarrySub(a, b));
