@@ -25,7 +25,7 @@ list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
 
 # Add command to copy CPU test data to build dir
 add_custom_target(copy_sm83_tests
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    COMMAND ${CMAKE_COMMAND} -E copy_directory_if_different
     ${sm83tests_SOURCE_DIR}/v1
     ${CMAKE_BINARY_DIR}/test/cputestdata
 )
@@ -46,6 +46,7 @@ target_link_libraries(gbbuddytest
 
 add_dependencies(gbbuddytest copy_sm83_tests)
 
-include(CTest)
+enable_testing()
+
 include(Catch)
 catch_discover_tests(gbbuddytest)
