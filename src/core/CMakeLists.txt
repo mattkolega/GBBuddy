@@ -1,8 +1,8 @@
 add_library(core STATIC
+    bus.cpp
     cartridge.cpp
     cpu.cpp
     gameboy.cpp
-    mmu.cpp
 
     mappers/mapper.cpp
     mappers/nombc.cpp
