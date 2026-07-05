@@ -63,6 +63,8 @@ add_executable(gbbuddy
 
 target_link_libraries(gbbuddy
     PRIVATE
+        project_sanitizers
+        project_warnings
         common
         core
         SDL3::SDL3

@@ -10,6 +10,8 @@ add_library(core STATIC
 
 target_link_libraries(core
     PRIVATE
+        project_sanitizers
+        project_warnings
         common
         fmt::fmt
 )
