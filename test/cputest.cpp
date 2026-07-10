@@ -10,12 +10,23 @@
 #include <glaze/glaze.hpp>
 
 #include "common/types.h"
-#include "core/gameboy.h"
 #include "core/cpu.h"
+#include "core/bus.h"
 
 namespace fs = std::filesystem;
 
 typedef std::tuple<int, int, std::string> Cycle;
+
+struct MemoryEntry {
+    u16 addr;
+    u8 val;
+};
+
+template <>
+struct glz::meta<MemoryEntry> {
+    using T = MemoryEntry;
+    static constexpr auto value = array(&T::addr, &T::val);
+};
 
 struct SM83State {
     u8 a {}, b {}, c {}, d {}, e {}, f {}, h {}, l {};
@@ -24,7 +35,7 @@ struct SM83State {
     u8 ime {};
     u8 ie {};
     u8 ei {};
-    std::vector<std::tuple<u16, u8>> ram {};
+    std::vector<MemoryEntry> ram {};
 };
 
 struct SingleTest {
@@ -34,53 +45,64 @@ struct SingleTest {
     std::vector<Cycle> cycles {};
 };
 
-void performTest(GameBoy *gb, const SingleTest &test) {
+class CPUFixture {
+public:
+    MockBus bus;
+    CPU cpu;
+
+    CPUFixture()
+        : cpu(bus) {};
+};
+
+void performTest(CPUFixture& cpuFixture, const SingleTest &test) {
     CPUState startingState {
         .a = test.initial.a,
+        .f = test.initial.f,
         .b = test.initial.b,
         .c = test.initial.c,
         .d = test.initial.d,
         .e = test.initial.e,
-        .f = test.initial.f,
         .h = test.initial.h,
         .l = test.initial.l,
         .sp = test.initial.sp,
         .pc = test.initial.pc,
+        .ime = test.initial.ime,
     };
 
-    gb->cpu.setState(startingState);
+    cpuFixture.cpu.setState(startingState);
 
-    for (const auto &memVal : test.initial.ram) {
-        gb->mmu->memoryWrite(std::get<0>(memVal), std::get<1>(memVal));
+    for (const auto &memEntry : test.initial.ram) {
+        cpuFixture.bus.write(memEntry.addr, memEntry.val);
     }
 
-    gb->cpu.step();
+    cpuFixture.cpu.step();
 
-    CPUState actualState = gb->cpu.getState();
+    CPUState actualState = cpuFixture.cpu.getState();
     CPUState expectedState {
         .a = test.final.a,
+        .f = test.final.f,
         .b = test.final.b,
         .c = test.final.c,
         .d = test.final.d,
         .e = test.final.e,
-        .f = test.final.f,
         .h = test.final.h,
         .l = test.final.l,
         .sp = test.final.sp,
         .pc = test.final.pc,
+        .ime = test.final.ime
     };
 
     std::ostringstream actualMem {};
     std::ostringstream expectedMem {};
 
     bool ramMatch {true};
-    for (const auto &memVal : test.final.ram) {
-        const auto value = gb->mmu->memoryRead(std::get<0>(memVal));
+    for (const auto &memEntry : test.final.ram) {
+        const auto value = cpuFixture.bus.read(memEntry.addr);
 
-        actualMem << "\tAddr: " << +std::get<0>(memVal) << " Val: " << +value << '\n';
-        expectedMem << "\tAddr: " << +std::get<0>(memVal) << " Val: " << +std::get<1>(memVal) << '\n';
+        actualMem << "\tAddr: " << +memEntry.addr << " Val: " << +value << '\n';
+        expectedMem << "\tAddr: " << +memEntry.addr << " Val: " << +memEntry.val << '\n';
 
-        if (value != std::get<1>(memVal)) {
+        if (value != memEntry.val) {
             ramMatch = false;
         }
     }
@@ -93,173 +115,172 @@ void performTest(GameBoy *gb, const SingleTest &test) {
     REQUIRE(ramMatch);
 }
 
-void testOpcode(GameBoy *gb, const std::string &filename) {
-    fs::path filepath = "cputestdata" / fs::path(filename + ".json");
+void testOpcode(CPUFixture& fixture, const std::string_view filename) {
+    fs::path filepath = "cputestdata" / fs::path(filename);
+    filepath.replace_extension(".json");
 
-    std::ifstream file(filepath);
-    if (!file) { SKIP("Failed to open test data file."); }
+    std::ifstream file {filepath};
+    if (!file) SKIP("Failed to open test data file.");
 
     // Get file size
     file.seekg(0, std::ios::end);
-    size_t size = file.tellg();
+    std::streampos size {file.tellg()};
     file.seekg(0, std::ios::beg);
 
     std::string jsonString(size, ' ');
 
     file.read(jsonString.data(), size);
+    if (!file) SKIP("Failed to read test data file.");
 
     std::vector<SingleTest> testData;
-    const auto error = glz::read_json<std::vector<SingleTest>>(testData, jsonString);
-    if (error) SKIP("Failed to parse JSON test data.");
+    const auto error {glz::read_json<std::vector<SingleTest>>(testData, jsonString)};
+    if (error) {
+        std::string error_msg = glz::format_error(error, jsonString);
+        SKIP(error_msg);
+    }
 
     for (const auto &test : testData) {
-        performTest(gb, test);
+        performTest(fixture, test);
     }
 }
 
-TEST_CASE_METHOD(GameBoy, "CPU 8-bit arithmetic and logic instructions") {
-    initForTests();
-
+TEST_CASE_METHOD(CPUFixture, "CPU 8-bit arithmetic and logic instructions") {
     SECTION("ADC: Add with Carry") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "88", "89", "8A", "8B", "8C", "8D", "8E", "8F", "CE"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto &opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("ADD: Add") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "80", "81", "82", "83", "84", "85", "86", "87", "C6"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("AND: Logical AND") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7", "E6"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("CP: Compare") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "B8", "B9", "BA", "BB", "BC", "BD", "BE", "BF", "FE"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("DEC: Decrement") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "05", "0D", "15", "1D", "25", "2D", "35", "3D"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("INC: Increment") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "04", "0C", "14", "1C", "24", "2C", "34", "3C"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("OR: Logical OR") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "F6"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("SBC: Subtract with Carry") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "98", "99", "9A", "9B", "9C", "9D", "9E", "9F", "DE"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("SUB: Subtract") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "90", "91", "92", "93", "94", "95", "96", "97", "D6"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("XOR: Exclusive OR") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "A8", "A9", "AA", "AB", "AC", "AD", "AE", "AF", "EE"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 }
 
-TEST_CASE_METHOD(GameBoy, "CPU 16-bit arithmetic instructions") {
-    initForTests();
-
+TEST_CASE_METHOD(CPUFixture, "CPU 16-bit arithmetic instructions") {
     SECTION("ADD: Add") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "09", "19", "29"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("DEC: Decrement") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "0B", "1B", "2B", "3B"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("INC: Increment") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "03", "13", "23", "33"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 }
 
-TEST_CASE_METHOD(GameBoy, "CPU bit operation instructions") {
-    initForTests();
-
+TEST_CASE_METHOD(CPUFixture, "CPU bit operation instructions") {
     SECTION("BIT: Check bit") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "CB 40", "CB 41", "CB 42", "CB 43", "CB 44", "CB 45", "CB 46", "CB 47",
             "CB 48", "CB 49", "CB 4A", "CB 4B", "CB 4C", "CB 4D", "CB 4E", "CB 4F",
             "CB 50", "CB 51", "CB 52", "CB 53", "CB 54", "CB 55", "CB 56", "CB 57",
@@ -270,13 +291,13 @@ TEST_CASE_METHOD(GameBoy, "CPU bit operation instructions") {
             "CB 78", "CB 79", "CB 7A", "CB 7B", "CB 7C", "CB 7D", "CB 7E", "CB 7F",
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("RES: Reset bit") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "CB 80", "CB 81", "CB 82", "CB 83", "CB 84", "CB 85", "CB 86", "CB 87",
             "CB 88", "CB 89", "CB 8A", "CB 8B", "CB 8C", "CB 8D", "CB 8E", "CB 8F",
             "CB 90", "CB 91", "CB 92", "CB 93", "CB 94", "CB 95", "CB 96", "CB 97",
@@ -287,13 +308,13 @@ TEST_CASE_METHOD(GameBoy, "CPU bit operation instructions") {
             "CB B8", "CB B9", "CB BA", "CB BB", "CB BC", "CB BD", "CB BE", "CB BF",
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("SET: Set bit") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "CB C0", "CB C1", "CB C2", "CB C3", "CB C4", "CB C5", "CB C6", "CB C7",
             "CB C8", "CB C9", "CB CA", "CB CB", "CB CC", "CB CD", "CB CE", "CB CF",
             "CB D0", "CB D1", "CB D2", "CB D3", "CB D4", "CB D5", "CB D6", "CB D7",
@@ -304,117 +325,113 @@ TEST_CASE_METHOD(GameBoy, "CPU bit operation instructions") {
             "CB F8", "CB F9", "CB FA", "CB FB", "CB FC", "CB FD", "CB FE", "CB FF",
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("SWAP: Swap nibbles") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "CB 30", "CB 31", "CB 32", "CB 33", "CB 34", "CB 35", "CB 36", "CB 37",
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 }
 
-TEST_CASE_METHOD(GameBoy, "CPU bit shift instructions") {
-    initForTests();
-
+TEST_CASE_METHOD(CPUFixture, "CPU bit shift instructions") {
     SECTION("RL: Rotate left") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "CB 10", "CB 11", "CB 12", "CB 13", "CB 14", "CB 15", "CB 16", "CB 17",
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("RLA: Rotate left accumulator") {
-        testOpcode(this, "17");
+        testOpcode(*this, "17");
     }
 
     SECTION("RLC: Rotate left with carry") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "CB 00", "CB 01", "CB 02", "CB 03", "CB 04", "CB 05", "CB 06", "CB 07",
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("RLCA: Rotate left accumulator with carry") {
-        testOpcode(this, "07");
+        testOpcode(*this, "07");
     }
 
     SECTION("RR: Rotate right") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "CB 18", "CB 19", "CB 1A", "CB 1B", "CB 1C", "CB 1D", "CB 1E", "CB 1F",
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("RRA: Rotate right accumulator") {
-        testOpcode(this, "1F");
+        testOpcode(*this, "1F");
     }
 
     SECTION("RRC: Rotate right with carry") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "CB 08", "CB 09", "CB 0A", "CB 0B", "CB 0C", "CB 0D", "CB 0E", "CB 0F",
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("RRCA: Rotate right accumulator with carry") {
-        testOpcode(this, "0F");
+        testOpcode(*this, "0F");
     }
 
     SECTION("SLA: Shift left arithmetically") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "CB 20", "CB 21", "CB 22", "CB 23", "CB 24", "CB 25", "CB 26", "CB 27",
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("SRA: Shift right arithmetically") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "CB 28", "CB 29", "CB 2A", "CB 2B", "CB 2C", "CB 2D", "CB 2E", "CB 2F",
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("SRL: Shift right logically") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "CB 38", "CB 39", "CB 3A", "CB 3B", "CB 3C", "CB 3D", "CB 3E", "CB 3F",
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 }
 
-TEST_CASE_METHOD(GameBoy, "CPU load instructions") {
-    initForTests();
-
+TEST_CASE_METHOD(CPUFixture, "CPU load instructions") {
     SECTION("LD r8: Load into 8-bit register") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "06", "0E", "16", "1E", "26", "2E", "3E",
             "40", "41", "42", "43", "44", "45", "46", "47",
             "48", "49", "4A", "4B", "4C", "4D", "4E", "4F",
@@ -425,234 +442,228 @@ TEST_CASE_METHOD(GameBoy, "CPU load instructions") {
             "78", "79", "7A", "7B", "7C", "7D", "7E", "7F",
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("LD r16: Load into 16-bit register") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "01", "11", "21", "31"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("LD HL: Load into memory at address HL") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "36", "70", "71", "72", "73", "74", "75", "77"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("LD n16 A: Load A into memory at address n16") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "02", "12", "EA"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("LD A n16: Load memory at address n16 at A") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "0A", "1A", "FA"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("LDH u8 A: Load A into memory at address $FF00 + u8") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "E0", "E2"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("LDH A u8: Load memory at address $FF00 + u8 into A") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "F0", "F2"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("LD HLI A: Load A into memory at address HL and increment HL") {
-        testOpcode(this, "22");
+        testOpcode(*this, "22");
     }
 
     SECTION("LD HLD A: Load A into memory at address HL and decrement HL") {
-        testOpcode(this, "32");
+        testOpcode(*this, "32");
     }
 
     SECTION("LD A HLI: Load memory at address HL into A and increment HL") {
-        testOpcode(this, "2A");
+        testOpcode(*this, "2A");
     }
 
     SECTION("LD A HLD: Load memory at address HL into A and decrement HL") {
-        testOpcode(this, "3A");
+        testOpcode(*this, "3A");
     }
 }
 
-TEST_CASE_METHOD(GameBoy, "CPU jump and subroutine instructions") {
-    initForTests();
-
+TEST_CASE_METHOD(CPUFixture, "CPU jump and subroutine instructions") {
     SECTION("CALL: Call") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "C4", "CC", "CD", "D4", "DC"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("JP: Jump") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "C2", "C3", "CA", "D2", "DA", "E9"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("JR: Jump relative") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "18", "20", "28", "30", "38"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("RET: Return") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "C0", "C8", "C9", "D0", "D8"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("RETI: Return and enable interrupts") {
-        testOpcode(this, "D9");
+        testOpcode(*this, "D9");
     }
 
     SECTION("RST: Call vector") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "C7", "CF", "D7", "DF", "E7", "EF", "F7", "FF"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 }
 
-TEST_CASE_METHOD(GameBoy, "CPU stack operation instructions") {
-    initForTests();
-
+TEST_CASE_METHOD(CPUFixture, "CPU stack operation instructions") {
     SECTION("ADD: Add") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "39", "E8"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("DEC: Decrement") {
-        testOpcode(this, "3B");
+        testOpcode(*this, "3B");
     }
 
     SECTION("INC: Increment") {
-        testOpcode(this, "33");
+        testOpcode(*this, "33");
     }
 
     SECTION("LD: Load") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "08", "31", "F8", "F9"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("POP: Pop from stack") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "C1", "D1", "E1", "F1"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 
     SECTION("PUSH: Push to stack") {
-        constexpr std::string tests[] {
+        constexpr std::string_view opcodes[] {
             "C5", "D5", "E5", "F5"
         };
 
-        for (const std::string &test : tests) {
-            testOpcode(this, test);
+        for (const auto& opcode : opcodes) {
+            testOpcode(*this, opcode);
         }
     }
 }
 
-TEST_CASE_METHOD(GameBoy, "CPU miscellaneous instructions") {
-    initForTests();
-
+TEST_CASE_METHOD(CPUFixture, "CPU miscellaneous instructions") {
     SECTION("CCF: Complement carry flag") {
-        testOpcode(this, "3F");
+        testOpcode(*this, "3F");
     }
 
     SECTION("CPL: Complement accumulator") {
-        testOpcode(this, "2F");
+        testOpcode(*this, "2F");
     }
 
     SECTION("DAA: Decimal adjust accumulator") {
-        testOpcode(this, "27");
+        testOpcode(*this, "27");
     }
 
     SECTION("DI: Disable interrupts") {
-        testOpcode(this, "F3");
+        testOpcode(*this, "F3");
     }
 
     SECTION("EI: Enable interrupts") {
-        testOpcode(this, "FB");
+        testOpcode(*this, "FB");
     }
 
     SECTION("HALT: Halt") {
-        testOpcode(this, "76");
+        testOpcode(*this, "76");
     }
 
     SECTION("NOP: No operation") {
-        testOpcode(this, "00");
+        testOpcode(*this, "00");
     }
 
     SECTION("SCF: Set carry flag") {
-        testOpcode(this, "37");
+        testOpcode(*this, "37");
     }
 
     SECTION("STOP: Stop") {
-        testOpcode(this, "10");
+        testOpcode(*this, "10");
     }
 }
