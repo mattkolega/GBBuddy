@@ -24,6 +24,7 @@ std::string CPUState::toString() {
            << " E: " << +e
            << " H: " << +h
            << " L: " << +l
+           << " IME: " << +ime
            << " SP: " << +sp
            << " PC: " << +pc;
     return stream.str();
@@ -75,7 +76,8 @@ CPUState CPU::getState() {
         .h = m_hl.hi,
         .l = m_hl.lo,
         .sp = m_sp,
-        .pc = m_pc
+        .pc = m_pc,
+        .ime = m_ime
     };
 }
 
@@ -123,7 +125,7 @@ void CPU::writeReg8(Reg8 reg, u8 value) {
 
     switch (reg) {
     case A: m_af.hi = value; break;
-    case F: m_af.lo = value; break;
+    case F: m_af.lo = value & 0xF0; break;
     case B: m_bc.hi = value; break;
     case C: m_bc.lo = value; break;
     case D: m_de.hi = value; break;
@@ -131,23 +133,21 @@ void CPU::writeReg8(Reg8 reg, u8 value) {
     case H: m_hl.hi = value; break;
     case L: m_hl.lo = value; break;
     case HLMem: m_bus.write(m_hl.full, value); break;
+    default: std::unreachable();
     }
-
-    std::unreachable();
 }
 
 void CPU::writeReg16(Reg16 reg, u16 value) {
     using enum Reg16;
 
     switch (reg) {
-    case AF: m_af.full = value; break;
+    case AF: m_af.full = value & 0xFFF0; break;
     case BC: m_bc.full = value; break;
     case DE: m_de.full = value; break;
     case HL: m_hl.full = value; break;
     case SP: m_sp = value; break;
+    default: std::unreachable();
     }
-
-    std::unreachable();
 }
 
 u8 CPU::getCarry() const     { return bits::getBitInByte(m_af.lo, std::to_underlying(CPUFlags::C)); }
@@ -234,7 +234,7 @@ void CPU::DEC8(Reg8 reg) {
 
     setZero(newValue == 0);
     setSubtract(1);
-    setHalfCarry(bits::checkHalfCarrySub(newValue, 1));
+    setHalfCarry(bits::checkHalfCarrySub(originalValue, 1));
 
     writeReg8(reg, newValue);
 }
@@ -245,7 +245,7 @@ void CPU::INC8(Reg8 reg) {
 
     setZero(newValue == 0);
     setSubtract(0);
-    setHalfCarry(bits::checkHalfCarryAdd(newValue, 1));
+    setHalfCarry(bits::checkHalfCarryAdd(originalValue, 1));
 
     writeReg8(reg, newValue);
 }
@@ -372,8 +372,8 @@ u8 CPU::RL(u8 value) {
 }
 
 void CPU::RL_r8(Reg8 reg) {
-    u8 newValue = RL(m_bus.read(readReg8(reg)));
-    m_bus.write(readReg8(reg), newValue);
+    u8 newValue = RL(readReg8(reg));
+    writeReg8(reg, newValue);
 
     // Set flags
     setZero(newValue == 0);
@@ -396,8 +396,8 @@ u8 CPU::RLC(u8 value) {
 }
 
 void CPU::RLC_r8(Reg8 reg) {
-    u8 newValue = RLC(m_bus.read(readReg8(reg)));
-    m_bus.write(readReg8(reg), newValue);
+    u8 newValue = RLC(readReg8(reg));
+    writeReg8(reg, newValue);
 
     // Set flags
     setZero(newValue == 0);
@@ -422,8 +422,8 @@ u8 CPU::RR(u8 value) {
 }
 
 void CPU::RR_r8(Reg8 reg) {
-    u8 newValue = RR(m_bus.read(readReg8(reg)));
-    m_bus.write(readReg8(reg), newValue);
+    u8 newValue = RR(readReg8(reg));
+    writeReg8(reg, newValue);
 
     // Set flags
     setZero(newValue == 0);
@@ -446,8 +446,8 @@ u8 CPU::RRC(u8 value) {
 }
 
 void CPU::RRC_r8(Reg8 reg) {
-     u8 newValue = RRC(m_bus.read(readReg8(reg)));
-    m_bus.write(readReg8(reg), newValue);
+    u8 newValue = RRC(readReg8(reg));
+    writeReg8(reg, newValue);
 
     // Set flags
     setZero(newValue == 0);
@@ -564,21 +564,19 @@ Jumps and Subroutines
  */
 
 void CPU::CALL(bool condition) {
+    u16 address = bits::concatBytes(m_bus.read(m_pc), m_bus.read(m_pc+1));
+    m_pc += 2;
     if (condition) {
         pushToStack(m_pc);
-        u16 address = bits::concatBytes(m_bus.read(m_pc), m_bus.read(m_pc+1));
         m_pc = address;
-    } else {
-        m_pc += 2;
     }
 }
 
 void CPU::JP(bool condition) {
+    u16 address = bits::concatBytes(m_bus.read(m_pc), m_bus.read(m_pc+1));
+    m_pc += 2;
     if (condition) {
-        u16 address = bits::concatBytes(m_bus.read(m_pc), m_bus.read(m_pc+1));
         m_pc = address;
-    } else {
-        m_pc += 2;
     }
 }
 
@@ -587,11 +585,9 @@ void CPU::JP_HL() {
 }
 
 void CPU::JR(bool condition) {
+    i8 offset = m_bus.read(m_pc++);
     if (condition) {
-        i8 offset = m_bus.read(m_pc++);
         m_pc += offset;
-    } else {
-        m_pc++;
     }
 }
 
@@ -659,6 +655,14 @@ void CPU::LD_SP_HL() {
     m_sp = m_hl.full;
 }
 
+void CPU::POP(Reg16 reg) {
+    writeReg16(reg, popStack());
+}
+
+void CPU::PUSH(Reg16 reg) {
+    pushToStack(readReg16(reg));
+}
+
 /**
 Miscellaneous Instructions
  */
@@ -666,7 +670,7 @@ Miscellaneous Instructions
 void CPU::CCF() {
     setSubtract(0);
     setHalfCarry(0);
-    setCarry(~getCarry());
+    setCarry(!getCarry());
 }
 
 void CPU::CPL() {
@@ -681,11 +685,11 @@ void CPU::DAA() {
     u8 accumulator = readReg8(Reg8::A);
     u8 adjustment {0};
 
-    if (getSubtract() == 0 && (accumulator & 0xF) > 0x9 || getHalfCarry() == 1) {
+    if ((getSubtract() == 0 && (accumulator & 0xF) > 0x9) || getHalfCarry() == 1) {
         adjustment |= 0x06;
     }
 
-    if (getSubtract() == 0 && accumulator > 0x99 || getCarry() == 1) {
+    if ((getSubtract() == 0 && accumulator > 0x99) || getCarry() == 1) {
         adjustment |= 0x60;
         setCarry(1);
     }
@@ -731,7 +735,7 @@ void CPU::decode(u8 opcode) {
 
     switch (opcode) {
     case 0x00: NOP(); break;
-    case 0x01: LD16(BC, m_bus.read(m_pc++)); break;
+    case 0x01: LD16(BC, bits::concatBytes(m_bus.read(m_pc), m_bus.read(m_pc+1))); m_pc+=2; break;
     case 0x02: LD_n16_A(readReg16(BC)); break;
     case 0x03: INC16(BC); break;
     case 0x04: INC8(B); break;
@@ -747,15 +751,15 @@ void CPU::decode(u8 opcode) {
     case 0x0E: LD8(C, m_bus.read(m_pc++)); break;
     case 0x0F: RRCA(); break;
 
-    case 0x10: STOP(); m_pc++; break;
-    case 0x11: LD16(DE, m_bus.read(m_pc++)); break;
+    case 0x10: STOP(); break;
+    case 0x11: LD16(DE, bits::concatBytes(m_bus.read(m_pc), m_bus.read(m_pc+1))); m_pc+=2; break;
     case 0x12: LD_n16_A(readReg16(DE)); break;
     case 0x13: INC16(DE); break;
     case 0x14: INC8(D); break;
     case 0x15: DEC8(D); break;
     case 0x16: LD8(D, m_bus.read(m_pc++)); break;
     case 0x17: RLA(); break;
-    case 0x18: JR(m_bus.read(m_pc++)); break;
+    case 0x18: JR(); break;
     case 0x19: ADD16(DE); break;
     case 0x1A: LD_A_n16(readReg16(DE)); break;
     case 0x1B: DEC16(DE); break;
@@ -765,7 +769,7 @@ void CPU::decode(u8 opcode) {
     case 0x1F: RRA(); break;
 
     case 0x20: JR(getZero() == 0); break;
-    case 0x21: LD16(HL, m_bus.read(m_pc++)); break;
+    case 0x21: LD16(HL, bits::concatBytes(m_bus.read(m_pc), m_bus.read(m_pc+1))); m_pc+=2; break;
     case 0x22: LD_HLI_A(); break;
     case 0x23: INC16(HL); break;
     case 0x24: INC8(H); break;
@@ -789,7 +793,7 @@ void CPU::decode(u8 opcode) {
     case 0x35: DEC8(HLMem); break;
     case 0x36: LD8(HLMem, m_bus.read(m_pc++)); break;
     case 0x37: SCF(); break;
-    case 0x38: JR(getCarry() == 0); break;
+    case 0x38: JR(getCarry() == 1); break;
     case 0x39: ADD_HL_SP(); break;
     case 0x3A: LD_A_HLD(); break;
     case 0x3B: DEC16(SP); break;
@@ -983,7 +987,7 @@ void CPU::decode(u8 opcode) {
     case 0xEC: break;
     case 0xED: break;
     case 0xEE: XOR(m_bus.read(m_pc++)); break;
-    case 0xEF: RST(0x18); break;
+    case 0xEF: RST(0x28); break;
 
     case 0xF0: LDH_A_n16(m_bus.read(m_pc++)); break;
     case 0xF1: POP(AF); break;
@@ -996,14 +1000,14 @@ void CPU::decode(u8 opcode) {
     case 0xF8: LD_HL_SP(m_bus.read(m_pc++)); break;
     case 0xF9: LD_SP_HL(); break;
     case 0xFA: LD_A_n16(bits::concatBytes(m_bus.read(m_pc), m_bus.read(m_pc+1))); m_pc+=2; break;
-    case 0xFB: EI();
+    case 0xFB: EI(); break;
     case 0xFC: break;
     case 0xFD: break;
     case 0xFE: CP(m_bus.read(m_pc++)); break;
-    case 0xFF: RST(0x38);
-    }
+    case 0xFF: RST(0x38); break;
 
-    std::unreachable();
+    default: std::unreachable();
+    }
 }
 
 void CPU::decodeCB(u8 opcode) {
@@ -1282,7 +1286,7 @@ void CPU::decodeCB(u8 opcode) {
     case 0xFD: SET(L, 7); break;
     case 0xFE: SET(HLMem, 7); break;
     case 0xFF: SET(A, 7); break;
-    }
 
-    std::unreachable();
+    default: std::unreachable();
+    }
 }
