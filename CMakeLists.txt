@@ -60,6 +60,9 @@ configure_file(
 add_executable(gbbuddy
     src/main.cpp
     src/application.cpp
+    src/platform.cpp
+    src/renderer.cpp
+    src/window.cpp
 )
 
 target_link_libraries(gbbuddy
