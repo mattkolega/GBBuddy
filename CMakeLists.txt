@@ -7,6 +7,11 @@ project(
     LANGUAGES CXX C
 )
 
+# Enable OBJC on macOS so third-party libs like NFD work properly
+if(APPLE)
+    enable_language(OBJC)
+endif()
+
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
@@ -25,26 +30,22 @@ FetchContent_Declare(
 FetchContent_Declare(
     SDL3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
-    GIT_TAG        release-3.4.10
+    GIT_TAG        release-3.4.12
     GIT_SHALLOW    TRUE
 )
-# Get tinyfiledialogs for native dialogs
+# Get NFD for file dialogs
 FetchContent_Declare(
-    tinyfiledialogs
-    GIT_REPOSITORY https://git.code.sf.net/p/tinyfiledialogs/code
-    GIT_TAG        master
-    GIT_SHALLOW    TRUE
+    nfd
+    GIT_REPOSITORY https://github.com/btzy/nativefiledialog-extended.git
+    GIT_TAG v1.3.0
+    GIT_SHALLOW TRUE
 )
 
 # Stop SDL from compiling tests
 set(SDL_TEST_LIBRARY OFF CACHE BOOL "" FORCE)
 set(SDL_TESTS OFF CACHE BOOL "" FORCE)
 
-FetchContent_MakeAvailable(fmt SDL3 tinyfiledialogs)
-
-# tinyfiledialogs needs to be compiled before it can be used
-add_library(tinyfiledialogs_lib STATIC ${tinyfiledialogs_SOURCE_DIR}/tinyfiledialogs.c)
-target_include_directories(tinyfiledialogs_lib INTERFACE ${tinyfiledialogs_SOURCE_DIR})
+FetchContent_MakeAvailable(fmt SDL3 nfd)
 
 add_subdirectory(src/common)
 add_subdirectory(src/core)
@@ -67,6 +68,7 @@ target_link_libraries(gbbuddy
         project_warnings
         common
         core
+        nfd
         SDL3::SDL3
 )
 
