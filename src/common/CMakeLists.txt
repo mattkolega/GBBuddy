@@ -1,5 +1,4 @@
 add_library(common STATIC
-    dialog.cpp
     fs.cpp
 )
 
